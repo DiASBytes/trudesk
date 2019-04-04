@@ -135,9 +135,9 @@ var notifications = require('../notifications') // Load Push Events
                           winston.warn('[trudesk:events:ticket:created] - ' + err)
                           return c(err)
                         })
-                        .finally(function () {
-                          return c()
-                        })
+                      // .finally(function () {
+                      //   return c()
+                      // })
                     })
                   }
                 )
