@@ -347,7 +347,8 @@ function handleMessages (messages) {
                   priority: results.handlePriority,
                   subject: message.subject,
                   issue: message.body,
-                  history: [HistoryItem]
+                  history: [HistoryItem],
+                  subscribers: [message.owner._id]
                 },
                 function (err, ticket) {
                   if (err) {
