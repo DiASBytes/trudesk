@@ -204,7 +204,6 @@ function bindImapReady() {
                                                             message.ticket = t;
                                                         } else {
                                                             winston.debug("Reply email ticket not found");
-                                                            console.log({ err });
                                                         }
                                                     });
 
@@ -356,13 +355,13 @@ function handleMessages(messages) {
                         'handleGroup',
                         'handlePriority',
                         function (results, callback) {
-                            var HistoryItem = {
-                                action: 'ticket:created',
-                                description: 'Ticket was created.',
-                                owner: message.owner._id
-                            }
-
                             if (!message.reply || !message.ticket) {
+                                var HistoryItem = {
+                                    action: 'ticket:created',
+                                    description: 'Ticket was created.',
+                                    owner: message.owner._id
+                                }
+
                                 Ticket.create(
                                     {
                                         owner: message.owner._id,
@@ -390,9 +389,7 @@ function handleMessages(messages) {
                                     }
                                 )
                             } else {
-                                console.log("It's a reply and we have a ticket");
-
-                                message.ticket.addComment(message.replyUser._id, message.reply, function () {
+                                message.ticket.addComment(message.replyUser.id, message.reply, function () {
                                     message.ticket.save(function (err, t) {
                                         if (err) {
                                             winston.debug("Comment add failed!");
