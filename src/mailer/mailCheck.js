@@ -198,7 +198,7 @@ function bindImapReady() {
                                                 // Check if email is a reply
                                                 var isReply = mail.subject.match(/#[1-9]\d*\b/g);
                                                 if (isReply) {
-                                                    Ticket.getTicketByUid(isReply[0], function (err, t) {
+                                                    Ticket.getTicketByUid(isReply[0].substr(1), function (err, t) {
                                                         if (!err) {
                                                             message.reply = replyParser(mail.text, true);
                                                             message.ticket = t;
