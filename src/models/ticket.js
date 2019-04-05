@@ -399,6 +399,61 @@ ticketSchema.methods.setSubject = function (ownerId, subject, callback) {
 /**
  * Updates a given comment inside the comment array on this ticket
  * @instance
+ * @method addComment
+ * @memberof Ticket
+ *
+ * @param {Object} ownerId Account ID preforming this action
+ * @param {Object} ticketId Ticket ID to update
+ * @param {String} commentText Text to add the comment to
+ * @param {TicketCallback} callback Callback with the added ticket.
+ * @example
+ * ticket.addComment('ownerId', 'This is the comment string.', function(err, t) {
+ *    if (err) throw err;
+ *
+ *    ticket.save(function(err, t) {
+ *       if (err) throw err;
+ *    });
+ * });
+ */
+ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
+  var self = this
+
+  if (_.isUndefined(ownerId)) return callback('Invalid owner', null)
+
+  if (_.isUndefined(commentText)) return callback('Invalid comment', null)
+
+  var marked = require('marked')
+  
+  marked.setOptions({
+    breaks: true
+  });
+
+  var Comment = {
+    owner: ownerId,
+    date: new Date(),
+    comment: marked(commentText)
+  };
+
+  self.updated = Date.now();
+
+  console.log(self.comments, Comment);
+
+  self.comments.push(Comment)
+  
+  var HistoryItem = {
+    action: 'ticket:comment:added',
+    description: 'Comment was added',
+    owner: ownerId
+  }
+
+  self.history.push(HistoryItem)
+
+  return callback(null, self)
+}
+
+/**
+ * Updates a given comment inside the comment array on this ticket
+ * @instance
  * @method updateComment
  * @memberof Ticket
  *
