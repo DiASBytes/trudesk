@@ -300,7 +300,7 @@
                             {{/hasPermOverRole}}
                         </div>
                         <div class="tru-tabs comments-notes-tab uk-clearfix {{#compare (size data.ticket.commentsAndNotes) '<' 1}} hide {{/compare}}" style="padding: 20px 0 !important;" data-ticketId="{{data.ticket._id}}">
-                            <div class="tru-tab-selectors" style="margin-left: 110px;">
+                            <div class="tru-tab-selectors tru-tab-selectors--single-ticket">
                                 <a id="tab-all-comments" href="#" class="tru-tab-selector no-ajaxy active" data-tabid="0" data-ticketid="{{data.ticket._id}}">All
                                     <span class="uk-badge uk-badge-grey uk-badge-small">{{size data.ticket.commentsAndNotes}}</span>
                                 </a>
