@@ -15,6 +15,7 @@
 var _ = require('lodash')
 var path = require('path')
 var async = require('async')
+var moment = require('moment')
 var winston = require('winston')
 var emitter = require('../emitter')
 var util = require('../helpers/utils')
@@ -434,9 +435,14 @@ var notifications = require('../notifications') // Load Push Events
                   }
                 })
 
-                ticket.populate('comments.owner', function (err, ticket) {
+                ticket.populate('comments.owner', function (err, t) {
                   if (err) winston.warn(err)
                   if (err) return c()
+
+                  let comments = _.sortBy(t.comments, function(o) { return moment(o.date); }).reverse()
+
+                  let ticket = t;
+                  ticket.comments = comments;
 
                   email
                     .render('ticket-comment-added', {
