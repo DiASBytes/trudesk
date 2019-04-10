@@ -23,52 +23,6 @@ commands:
         - ~/.cache/yarn
 
 jobs:
-  build_general:
-    docker:
-    - image: circleci/node:10-stretch
-    - image: circleci/mongo:3.6
-    working_directory: ~/trudesk
-    steps:
-    - checkout
-    - yarninstall
-    - run:
-        name: Run Tests
-        command: yarn run test
-    - run:
-        name: Run Build
-        command: yarn run build
-  build_docker_next:
-    executor: docker-executor
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: Build Docker Image
-          command: |
-            docker build -t polonel/trudesk:next .
-      - run:
-          name: Push Docker Image (next)
-          command: |
-            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
-            docker push polonel/trudesk:next
-  build_develop:
-    docker:
-    - image: circleci/node:10-stretch
-    - image: circleci/mongo:3.6
-    working_directory: ~/trudesk
-    steps:
-    - checkout
-    - yarninstall
-    - run:
-        name: Run Tests
-        command: yarn run test
-    - run:
-        name: Run Build
-        command: yarn run build
-    - run:
-        name: Run Codacy
-        command: yarn run codacy
   build_production:
     docker:
     - image: circleci/node:10-stretch
@@ -87,34 +41,11 @@ jobs:
         name: Run Codacy
         command: yarn run codacy
     - run:
-        name: Semantic Release
-        command: npx semantic-release
+        name: Deploy Digital Ocean
+        command: echo "Deploy Digital Ocean"
 
 workflows:
   version: 2.1
-  general:
-    jobs:
-    - build_general:
-        filters:
-          branches:
-            ignore:
-              - develop
-              - master
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only: develop
-    jobs:
-      - build_docker_next
-  develop:
-    jobs:
-    - build_develop:
-        filters:
-          branches:
-            only: develop
   production:
     jobs:
     - build_production:
