@@ -7,7 +7,7 @@ fi
 
 if [ ! -f /usr/src/trudesk/public/uploads/users/defaultProfile.jpg ]; then
     echo "Coping defaultProfile.jpg"
-    cp /root/trudesk/public/img/defaultProfile.jpg /usr/src/trudesk/public/uploads/users/defaultProfile.jpg
+    cp /root/trudesk/public/img/defaultProfile.jpg /root/trudesk/public/uploads/users/defaultProfile.jpg
 fi
 
 node /root/trudesk/runner.js
