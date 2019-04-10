@@ -374,7 +374,7 @@ define([
         }
       }
 
-      $scope.changeStatus = function (status) {
+      $scope.changeStatus = function (status) {      
         var id = $('#__ticketId').html()
         var statusSelectBox = $('#statusSelect')
         if (statusSelectBox.length > 0) {
@@ -382,7 +382,28 @@ define([
           statusSelectBox.removeClass('shown')
         }
 
-        socket.ui.sendUpdateTicketStatus(id, status)
+        if(status === 3) {
+          UIkit.modal('#closeTicketWindow', {
+            modal: false, 
+            keyboard: false,
+            bgclose: false
+          }).show()
+        } else {
+          socket.ui.sendUpdateTicketStatus(id, status)
+        }
+      }
+
+      $scope.closeTicket = function (form) {     
+        var id = $('#__ticketId').html()
+        $scope.closeTicketFormSubmitted = true;
+
+        if(form.$valid) {
+          socket.ui.sendUpdateTicketStatus(id, 3)
+
+          console.info('Mail', $scope.cBillable ? $scope.cBillable : false, $scope.cDescription)
+
+          UIkit.modal('#closeTicketWindow').hide()
+        }  
       }
 
       $scope.clearAssignee = function () {
@@ -715,6 +736,7 @@ define([
         UIkit.modal('#addTagModal').hide()
       }
     })
+    // Close
     .directive('closeMouseUp', [
       '$document',
       function ($document) {
