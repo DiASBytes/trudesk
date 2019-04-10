@@ -35,6 +35,9 @@ jobs:
         name: Run Tests
         command: yarn run test
     - run:
+        name: Add to know hosts
+        command: ssh-keyscan support.diasbytes.com >> ~/.ssh/known_hosts
+    - run:
         name: Deploy Digital Ocean
         command: ssh $DOUSER@$DODOMAIN "cd /root/trudesk; git pull; npm install; pm2 restart trudesk;"
 
