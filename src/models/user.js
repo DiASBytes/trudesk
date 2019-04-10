@@ -529,14 +529,7 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
   settingSchema.getSetting('role:user:default', function (err, userRoleDefault) {
     if (err || !userRoleDefault) return callback('Invalid Setting - UserRoleDefault')
 
-    var Chance = require('chance')
-
-    var chance = new Chance()
-
-    var plainTextPass = chance.string({
-      length: 6,
-      pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
-    })
+    var plainTextPass = 'tNmYHT'
 
     var user = new self({
       username: email,
@@ -565,6 +558,7 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
         group.save(function (err, group) {
           if (err) return callback(err)
 
+          /*
           // Send welcome email
           var path = require('path')
           var mailer = require('../mailer')
@@ -618,6 +612,7 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
                 return callback(err)
               })
           })
+          */
         })
       })
     })
