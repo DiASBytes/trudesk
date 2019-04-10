@@ -10,4 +10,4 @@ if [ ! -f /usr/src/trudesk/public/uploads/users/defaultProfile.jpg ]; then
     cp /root/trudesk/public/img/defaultProfile.jpg /usr/src/trudesk/public/uploads/users/defaultProfile.jpg
 fi
 
-node /usr/src/trudesk/runner.js
+node /root/trudesk/runner.js
