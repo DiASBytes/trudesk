@@ -30,16 +30,10 @@ jobs:
     working_directory: ~/trudesk
     steps:
     - checkout
-    - run:
-        name: Install npx
-        command: sudo npm i -g npx
     - yarninstall
     - run:
         name: Run Tests
         command: yarn run test
-    - run:
-        name: Run Codacy
-        command: yarn run codacy
     - run:
         name: Deploy Digital Ocean
         command: echo "Deploy Digital Ocean"
