@@ -383,6 +383,9 @@ define([
         }
 
         if(status === 3) {
+          $scope.cBillable = null;
+          $scope.cDescription = null;
+
           UIkit.modal('#closeTicketWindow', {
             modal: false, 
             keyboard: false,
@@ -398,9 +401,10 @@ define([
         $scope.closeTicketFormSubmitted = true;
 
         if(form.$valid) {
-          socket.ui.sendUpdateTicketStatus(id, 3)
-
-          console.info('Mail', $scope.cBillable ? $scope.cBillable : false, $scope.cDescription)
+          socket.ui.sendUpdateTicketStatus(id, 3, true, {
+            billable: $scope.cBillable ? $scope.cBillable : false,
+            description: $scope.cDescription
+          });
 
           UIkit.modal('#closeTicketWindow').hide()
         }  

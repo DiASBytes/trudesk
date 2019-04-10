@@ -111,10 +111,6 @@ define('modules/ui', [
     })
   }
 
-  socketUi.sendUpdateTicketStatus = function (id, status) {
-    socket.emit('updateTicketStatus', { ticketId: id, status: status })
-  }
-
   socketUi.onReconnect = function () {
     socket.removeAllListeners('reconnect')
     socket.on('reconnect', function () {
@@ -139,8 +135,12 @@ define('modules/ui', [
     })
   }
 
-  socketUi.sendUpdateTicketStatus = function (id, status) {
-    socket.emit('updateTicketStatus', { ticketId: id, status: status })
+  socketUi.sendUpdateTicketStatus = function (id, status, mailNotification = false, mailData) {
+    if(mailNotification) {
+      socket.emit('updateTicketStatus', { ticketId: id, status: status, mailNotification: mailNotification, mailData: mailData })
+    } else {
+      socket.emit('updateTicketStatus', { ticketId: id, status: status })
+    }
   }
 
   socketUi.clearAssignee = function (id) {

@@ -68,11 +68,16 @@ events.onUpdateTicketStatus = function (socket) {
           if (err) return true
 
           emitter.emit('ticket:updated', ticketId)
+
           utils.sendToAllConnectedClients(io, 'updateTicketStatus', {
             tid: t._id,
             owner: t.owner,
             status: status
           })
+          
+          if(data.mailNotification) {
+            emitter.emit('ticket:updated:mail', ticket, data.mailData);
+          }
         })
       })
     })
