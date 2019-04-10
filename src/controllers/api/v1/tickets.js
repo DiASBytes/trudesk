@@ -136,89 +136,129 @@ function buildAvgResponse (ticketArray, callback) {
  *
  */
 apiTickets.get = function (req, res) {
-  var l = req.query.limit ? req.query.limit : 10
-  var limit = parseInt(l)
-  var page = parseInt(req.query.page)
-  var assignedSelf = req.query.assignedself
-  var status = req.query.status
-  var user = req.user
+    var l = req.query.limit ? req.query.limit : 10
+    var limit = parseInt(l)
+    var page = parseInt(req.query.page)
+    var assignedSelf = req.query.assignedself
+    var status = req.query.status
+    var user = req.user
 
-  var object = {
-    user: user,
-    limit: limit,
-    page: page,
-    assignedSelf: assignedSelf,
-    status: status
-  }
-
-  var ticketModel = require('../../../models/ticket')
-  var groupModel = require('../../../models/group')
-
-  async.waterfall(
-    [
-      function (callback) {
-        groupModel.getAllGroupsOfUserNoPopulate(user._id, function (err, grps) {
-          callback(err, grps)
-        })
-      },
-      function (grps, callback) {
-        if (permissions.canThis(user.role, 'tickets:public')) {
-          groupModel.getAllPublicGroups(function (err, publicGroups) {
-            if (err) return callback(err)
-
-            grps = grps.concat(publicGroups)
-
-            return callback(null, grps)
-          })
-        } else {
-          return callback(null, grps)
-        }
-      },
-      function (grps, callback) {
-        ticketModel.getTicketsWithObject(grps, object, function (err, results) {
-          if (!permissions.canThis(user.role, 'comments:view')) {
-            _.each(results, function (ticket) {
-              ticket.comments = []
-            })
-          }
-
-          if (!permissions.canThis(user.role, 'tickets:notes')) {
-            _.each(results, function (ticket) {
-              ticket.notes = []
-            })
-          }
-
-          // sanitize
-          _.each(results, function (ticket) {
-            ticket.subscribers = _.map(ticket.subscribers, function (s) {
-              return s._id
-            })
-
-            ticket.history = _.map(ticket.history, function (h) {
-              var obj = {
-                date: h.date,
-                _id: h._id,
-                action: h.action,
-                description: h.description,
-                owner: _.clone(h.owner)
-              }
-              obj.owner.role = h.owner.role._id
-              return obj
-            })
-
-            ticket.owner.role = ticket.owner.role._id
-          })
-
-          return callback(err, results)
-        })
-      }
-    ],
-    function (err, results) {
-      if (err) return res.send('Error: ' + err.message)
-
-      return res.json(results)
+    var object = {
+        user: user,
+        limit: limit,
+        page: page,
+        assignedSelf: assignedSelf,
+        status: status
     }
-  )
+
+    var ticketModel = require('../../../models/ticket')
+    var groupModel = require('../../../models/group')
+
+    async.waterfall(
+        [
+            function (callback) {
+                groupModel.getAllGroupsOfUserNoPopulate(user._id, function (err, grps) {
+                    callback(err, grps)
+                })
+            },
+            function (grps, callback) {
+                if (permissions.canThis(user.role, 'tickets:public')) {
+                    groupModel.getAllPublicGroups(function (err, publicGroups) {
+                        if (err) return callback(err)
+
+                        grps = grps.concat(publicGroups)
+
+                        return callback(null, grps)
+                    })
+                } else {
+                    return callback(null, grps)
+                }
+            },
+            function (grps, callback) {
+                ticketModel.getTicketsWithObject(grps, object, function (err, results) {
+                    if (!permissions.canThis(user.role, 'comments:view')) {
+                        _.each(results, function (ticket) {
+                            ticket.comments = []
+                        })
+                    }
+
+                    if (!permissions.canThis(user.role, 'tickets:notes')) {
+                        _.each(results, function (ticket) {
+                            ticket.notes = []
+                        })
+                    }
+
+                    // sanitize
+                    _.each(results, function (ticket) {
+                        ticket.subscribers = _.map(ticket.subscribers, function (s) {
+                            return s._id
+                        })
+
+                        ticket.history = _.map(ticket.history, function (h) {
+                            var obj = {
+                                date: h.date,
+                                _id: h._id,
+                                action: h.action,
+                                description: h.description,
+                                owner: _.clone(h.owner)
+                            }
+                            obj.owner.role = h.owner.role._id
+                            return obj
+                        })
+
+                        ticket.owner.role = ticket.owner.role._id
+                    })
+
+                    return callback(err, results)
+                })
+            }
+        ],
+        function (err, results) {
+            if (err) return res.send('Error: ' + err.message)
+
+            return res.json(results)
+        }
+    )
+}
+
+
+/**
+ * @api {get} /api/v1/tickets/group/:name Get Tickets by Group
+ * @apiName getByGroup
+ * @apiDescription Gets tickets for specific group
+ * @apiVersion 0.1.7
+ * @apiGroup Ticket
+ * @apiHeader {string} accesstoken The access token for the logged in user
+ *
+ * @apiExample Example usage:
+ * curl -H "accesstoken: {accesstoken}" -l http://localhost/api/v1/tickets/group/d-vdh.be
+ *
+ * @apiSuccess {number} count Count of Tickets Array
+ * @apiSuccess {array} tickets Tickets Array
+ *
+ * @apiError InvalidRequest The data was invalid
+ * @apiErrorExample
+ *      HTTP/1.1 400 Bad Request
+ {
+     "error": "Invalid Group name"
+ }
+ */
+apiTickets.getByGroup = function (req, res) {
+    var ticketSchema = require('../../../models/ticket');
+    var groupSchema = require('../../../models/group')
+
+    groupSchema.getGroupByName(req.params.name, function (err, group) {
+        if (err) return res.status(400).json({ success: false, error: err.message })
+
+        ticketSchema.getAllByGroup(group._id, function (err, tickets) {
+            if (err) return res.status(400).json({ success: false, error: err.message })
+
+            res.json({
+                success: true,
+                tickets: tickets
+            });
+        });
+    });
 }
 
 /**
