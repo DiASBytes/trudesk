@@ -325,6 +325,42 @@ var notifications = require('../notifications') // Load Push Events
     io.sockets.emit('ticket:updategrid')
   })
 
+  emitter.on('ticket:updated:mail', function (ticket, mailData, emails) {
+    var mailer = require('../mailer')
+
+    var email = new Email({
+      views: {
+        root: templateDir,
+        options: {
+          extension: 'handlebars'
+        }
+      }
+    })
+
+    email
+      .render('ticket-closed', {
+        ticket: ticket,
+        data: mailData
+      })
+      .then(function (html) {
+        var mailOptions = {
+          to: emails,
+          subject: 'Closed: Ticket #' + ticket.uid + '-' + ticket.subject,
+          html: html,
+          generateTextFromHTML: true
+        }
+
+        mailer.sendMail(mailOptions, function (err) {
+          if (err) {
+            winston.warn('[trudesk:events:sendSubscriberEmail] - ' + err)
+          }
+        })
+      })
+      .catch(function (err) {
+        winston.warn('[trudesk:events:sendSubscriberEmail] - ' + err)
+      })
+  })
+
   emitter.on('ticket:deleted', function (oId) {
     io.sockets.emit('ticket:delete', oId)
   })

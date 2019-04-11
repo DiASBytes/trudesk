@@ -563,6 +563,26 @@
             </div>
         </div>
 
+        <div class="uk-modal" id="closeTicketWindow">
+            <div class="uk-modal-dialog">
+                <form class="uk-form-stacked" name="closeTicketForm" ng-class="{'submitted': closeTicketFormSubmitted}">
+                    <div class="uk-margin-medium-bottom" style="margin: 25px 2.5px;">
+                        <div class="md-switch md-green">
+                            <label>Billable <input type="checkbox" name="cBillable" ng-model="cBillable" /><span class="lever"></span></label>
+                        </div>
+                    </div>
+                    <div class="uk-margin-medium-bottom">
+                        <label for="gDescription">Description *</label>
+                        <input type="text" class="md-input" ng-model="cDescription" name="cDescription" required />
+                    </div>
+                    <div class="uk-modal-footer uk-text-right">
+                        <button type="button" class="md-btn md-btn-flat uk-modal-close">Close</button>
+                        <button type="button" class="md-btn md-btn-flat md-btn-flat-primary" type="submit" ng-click="closeTicket(closeTicketForm)">Close ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div id="addTagModal" class="uk-modal" aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
             <div class="uk-modal-dialog uk-clearfix">
                 <a class="uk-modal-close uk-close no-ajaxy"></a>

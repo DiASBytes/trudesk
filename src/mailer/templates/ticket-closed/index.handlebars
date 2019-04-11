@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket #{{ticket.uid}}</title>
+    <style>
+        h1,h2,h3,h4,h5,h6 {
+            margin-bottom: 2px;
+        }
+        hr {
+            display: block;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            background: #ccc;
+            height: 3px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h2>Closed ticket #{{ticket.uid}}</h2>
+        <br/>
+        <hr/>
+            <h4>Billable: {{#if data.billabel}}Yes{{else}}No{{/if}}</h4>
+            <h4>Description: {{data.description}}</h4>
+        <br/>
+        <hr/>
+            <h3>Ticket #{{ticket.uid}}</h3>
+            <h4>{{ticket.subject}}</h4>
+            <p class="issue">{{{ticket.issue}}}</p>
+        <br/>
+        <hr/>
+    </div>
+</body>
+</html>
