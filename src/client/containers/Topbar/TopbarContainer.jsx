@@ -147,13 +147,10 @@ class TopbarContainer extends React.Component {
                             <i className='material-icons'>&#xE145;</i>
                           </button>
                         </li>
-                        <li className='top-bar-icon nopadding'>
-                          <i className='material-icons'>more_vert</i>
-                        </li>
                       </div>
                     )}
                     {/* End Create Ticket Perm */}
-                    <li className='top-bar-icon'>
+                    {/* <li className='top-bar-icon'>
                       <PDropdownTrigger target={'conversations'}>
                         <a
                           title={'Conversations'}
@@ -163,7 +160,7 @@ class TopbarContainer extends React.Component {
                           <i className='material-icons'>sms</i>
                         </a>
                       </PDropdownTrigger>
-                    </li>
+                    </li> */}
                     <li className='top-bar-icon'>
                       <PDropdownTrigger target={'notifications'}>
                         <a title={'Notifications'} className={'no-ajaxy uk-vertical-align'}>
@@ -176,7 +173,7 @@ class TopbarContainer extends React.Component {
                         </a>
                       </PDropdownTrigger>
                     </li>
-                    <li className='top-bar-icon'>
+                    {/* <li className='top-bar-icon'>
                       <OffCanvasTrigger target={'online-user-list'}>
                         <a title={'Online Users'} className='no-ajaxy'>
                           <i className='material-icons'>perm_contact_calendar</i>
@@ -190,8 +187,7 @@ class TopbarContainer extends React.Component {
                           </span>
                         </a>
                       </OffCanvasTrigger>
-                    </li>
-
+                    </li> */}
                     <li className='profile-area profile-name'>
                       <span>{viewdata.loggedInAccount.fullname}</span>
                       <div className='uk-position-relative uk-display-inline-block'>

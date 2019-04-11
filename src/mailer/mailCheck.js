@@ -156,7 +156,10 @@ function buildAttMessageFunction(attachment) {
     return function (msg, seqno) {
         var prefix = '(#' + seqno + ') ';
         
-        msg.on('body', function(stream, info) {
+        msg.on('body', function(stream) {
+            if (!fs.existsSync('./uploads/'))
+                fs.mkdirSync('./uploads/');
+
             var writeStream = fs.createWriteStream('./uploads/' + filename);
             
             writeStream.on('finish', function() {
