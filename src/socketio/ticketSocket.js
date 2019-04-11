@@ -76,7 +76,21 @@ events.onUpdateTicketStatus = function (socket) {
           })
           
           if(data.mailNotification) {
-            emitter.emit('ticket:updated:mail', ticket, data.mailData);
+            var settings = require('../models/setting')
+
+            settings.getSettingByName('onCloseTicketNotification:enable', function (err, setting) {
+              if (err) return console.log(err)
+
+              if (setting && setting.value === true) {
+                settings.getSettingByName('onCloseTicketEmails', function (err, emails) {
+                  if (err) return console.log(err)
+                  
+                  if(emails && emails.value !== '') {
+                    emitter.emit('ticket:updated:mail', ticket, data.mailData, emails.value);
+                  }
+                })
+              }
+            })
           }
         })
       })

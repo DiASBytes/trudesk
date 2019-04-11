@@ -107,6 +107,8 @@ util.getSettings = function (callback) {
 
     s.allowPublicTickets = parseSetting(settings, 'allowPublicTickets:enable', false)
     s.allowUserRegistration = parseSetting(settings, 'allowUserRegistration:enable', false)
+    s.onCloseTicketNotification = parseSetting(settings, 'onCloseTicketNotification:enable', false)
+    s.onCloseTicketEmails = parseSetting(settings, 'onCloseTicketEmails', '')
 
     s.privacyPolicy = parseSetting(settings, 'legal:privacypolicy', '')
     s.privacyPolicy.value = jsStringEscape(s.privacyPolicy.value)

@@ -47,6 +47,10 @@ class TicketsSettings extends React.Component {
     super(props)
 
     this.getTicketTags = this.getTicketTags.bind(this)
+
+    this.state = {
+      onCloseTicketEmails: '',
+    }
   }
 
   componentDidMount () {
@@ -67,6 +71,12 @@ class TicketsSettings extends React.Component {
       this.tagsPagination.render()
       if (this.tagsPagination.currentPage > this.tagsPagination.pages - 1)
         this.tagsPagination.selectPage(this.tagsPagination.pages - 1)
+    }
+
+    if(prevProps.settings.getIn(['settings', 'onCloseTicketEmails', 'value']) !== this.props.settings.getIn(['settings', 'onCloseTicketEmails', 'value'])) {
+      this.setState({
+        onCloseTicketEmails: this.getSetting('onCloseTicketEmails')
+      })
     }
   }
 
@@ -94,6 +104,12 @@ class TicketsSettings extends React.Component {
     this.props.getTagsWithPage({ limit: 16, page })
   }
 
+  onInputValueChanged (e, stateName) {
+    this.setState({
+      [stateName]: e.target.value
+    })
+  }
+
   onDefaultTicketTypeChange (e) {
     this.props.updateSetting({ name: 'ticket:type:default', value: e.target.value, stateName: 'defaultTicketType' })
   }
@@ -103,6 +119,15 @@ class TicketsSettings extends React.Component {
       name: 'allowPublicTickets:enable',
       value: e.target.checked,
       stateName: 'allowPublicTickets',
+      noSnackbar: true
+    })
+  }
+
+  onCloseTicketNotificationChanged (e) {
+    this.props.updateSetting({
+      name: 'onCloseTicketNotification:enable',
+      value: e.target.checked,
+      stateName: 'onCloseTicketNotification',
       noSnackbar: true
     })
   }
@@ -202,23 +227,10 @@ class TicketsSettings extends React.Component {
       return { text: type.get('name'), value: type.get('_id') }
     })
 
+    console.log('settingsRender', this.state.onCloseTicketEmails);
+
     return (
       <div className={active ? 'active' : 'hide'}>
-        <SettingItem
-          title={'Default Ticket Type'}
-          subtitle={'Default ticket type for newly created tickets.'}
-          component={
-            <SingleSelect
-              items={mappedTypes}
-              defaultValue={this.getSetting('defaultTicketType')}
-              onSelectChange={e => {
-                this.onDefaultTicketTypeChange(e)
-              }}
-              width={'50%'}
-              showTextbox={false}
-            />
-          }
-        />
         <SettingItem
           title={'Allow Public Tickets'}
           subtitle={
@@ -277,6 +289,48 @@ class TicketsSettings extends React.Component {
             />
           }
         />
+        <SettingItem
+          title={'Notification closed tickets'}
+          subtitle={'Repondents for notification when a ticket was closed'}
+          component={
+            <EnableSwitch
+              stateName={'onCloseTicketNotification'}
+              label={'Enabled'}
+              onChange={e => this.onCloseTicketNotificationChanged(e)}
+              checked={this.getSetting('onCloseTicketNotification')}
+            />
+          }
+        >
+          <div className={'uk-margin-medium-bottom'}>
+            <label>Respondents</label>
+            <input
+              type='text'
+              className={'md-input md-input-width-medium'}
+              name={'mailerHost'}
+              disabled={!this.getSetting('onCloseTicketNotification')}
+              value={this.state.onCloseTicketEmails}
+              onChange={e => this.onInputValueChanged(e, 'onCloseTicketEmails')}
+            />
+          </div>
+          <div className='uk-clearfix'>
+            <Button
+              text={'Apply'}
+              style={'success'}
+              extraClass={'uk-float-right'}
+              disabled={!this.getSetting('onCloseTicketNotification')}
+              waves={true}
+              flat={true}
+              onClick={e => {
+                this.props.updateSetting({
+                  name: 'onCloseTicketEmails',
+                  value: this.state.onCloseTicketEmails,
+                  stateName: 'onCloseTicketEmails',
+                  noSnackbar: false
+                })
+              }}
+            />
+          </div>
+        </SettingItem>
         <SplitSettingsPanel
           title={'Ticket Types'}
           subtitle={'Create/Modify Ticket Types'}

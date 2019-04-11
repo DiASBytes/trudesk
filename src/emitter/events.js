@@ -325,7 +325,7 @@ var notifications = require('../notifications') // Load Push Events
     io.sockets.emit('ticket:updategrid')
   })
 
-  emitter.on('ticket:updated:mail', function (ticket, mailData) {
+  emitter.on('ticket:updated:mail', function (ticket, mailData, emails) {
     var mailer = require('../mailer')
 
     var email = new Email({
@@ -344,7 +344,7 @@ var notifications = require('../notifications') // Load Push Events
       })
       .then(function (html) {
         var mailOptions = {
-          to: 'thomasvangroenweghe@gmail.com',
+          to: emails,
           subject: 'Closed: Ticket #' + ticket.uid + '-' + ticket.subject,
           html: html,
           generateTextFromHTML: true
