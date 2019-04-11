@@ -21,6 +21,9 @@ var simpleParser = require('mailparser').simpleParser
 var cheerio = require('cheerio')
 var replyParser = require('node-email-reply-parser')
 
+var fs = require('fs');
+var base64  = require('base64-stream')
+
 var emitter = require('../emitter')
 var userSchema = require('../models/user')
 var groupSchema = require('../models/group')
@@ -130,6 +133,51 @@ function onImapReady() {
     mailCheck.Imap.destroy();
 }
 
+function toUpper(thing) { return thing && thing.toUpperCase ? thing.toUpperCase() : thing;}
+
+function findAttachmentParts(struct, attachments) {
+    attachments = attachments ||  []
+
+    struct.forEach((i) => {
+        if (Array.isArray(i)) {
+            findAttachmentParts(i, attachments)
+        } else if (i.disposition && ['INLINE', 'ATTACHMENT'].indexOf(toUpper(i.disposition.type)) > -1) {
+        attachments.push(i)
+        }
+    })
+
+    return attachments
+}
+
+function buildAttMessageFunction(attachment) {
+    var filename = attachment.params.name;
+    var encoding = attachment.encoding;
+
+    return function (msg, seqno) {
+        var prefix = '(#' + seqno + ') ';
+        
+        msg.on('body', function(stream, info) {
+            var writeStream = fs.createWriteStream('./uploads/' + filename);
+            
+            writeStream.on('finish', function() {
+                console.log(prefix + 'Done writing to file %s', filename);
+            });
+
+            if (toUpper(encoding) === 'BASE64') {
+                console.log('base64', base64);
+
+                stream.pipe(new base64.Base64Decode()).pipe(writeStream);
+            } else  {
+                stream.pipe(writeStream);
+            }
+        });
+
+        msg.once('end', function() {
+            console.log(prefix + 'Finished attachment %s', filename);
+        });
+    };
+}
+
 function bindImapReady() {
     try {
         mailCheck.Imap.on('ready', function () {
@@ -163,12 +211,14 @@ function bindImapReady() {
                                 var message = {}
 
                                 var f = mailCheck.Imap.fetch(results, {
-                                    bodies: ''
+                                    bodies: '',
+                                    struct: true
                                 })
 
                                 f.on('message', function (msg) {
                                     msg.on('body', function (stream) {
                                         var buffer = ''
+                                        
                                         stream.on('data', function (chunk) {
                                             buffer += chunk.toString('utf8')
                                         })
@@ -213,6 +263,21 @@ function bindImapReady() {
                                             })
                                         })
                                     })
+
+                                    msg.once('attributes', function(attrs) {
+                                        var attachments = findAttachmentParts(attrs.struct);
+                                        
+                                        for (var i = 0; i < attachments.length; i++) {
+                                            var attachment = attachments[i];
+
+                                            var f = mailCheck.Imap.fetch(attrs.uid, {
+                                                bodies: [attachment.partID],
+                                                struct: true
+                                            });
+
+                                            f.on('message', buildAttMessageFunction(attachment));
+                                        }
+                                    });
                                 })
 
                                 f.on('end', function () {

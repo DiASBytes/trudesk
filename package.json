@@ -25,6 +25,7 @@
     "archiver": "3.0.0",
     "async": "2.6.1",
     "axios": "0.18.0",
+    "base64-stream": "1.0.0",
     "bcrypt": "3.0.5",
     "body-parser": "1.18.3",
     "busboy": "0.2.14",
