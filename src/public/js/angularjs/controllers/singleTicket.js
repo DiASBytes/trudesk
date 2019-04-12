@@ -542,6 +542,10 @@ define([
         }
       }
 
+      $scope.openAttachment = function(path) {
+        $window.open(path);
+      }
+
       $scope.showUploadAttachment = function ($event) {
         $event.preventDefault()
         var self = $($event.currentTarget)

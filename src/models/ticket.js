@@ -436,8 +436,6 @@ ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
 
     self.updated = Date.now();
 
-    console.log(self.comments, Comment);
-
     self.comments.push(Comment)
 
     var HistoryItem = {
@@ -575,6 +573,18 @@ ticketSchema.methods.removeNote = function (ownerId, noteId, callback) {
         owner: ownerId
     }
     self.history.push(historyItem)
+
+    return callback(null, self)
+}
+
+ticketSchema.methods.addAttachments = function (ticketId, attachments, callback) {
+    var self = this
+
+    if (_.isUndefined(ticketId)) return callback('Invalid ticket', null)
+
+    if (_.isUndefined(attachments)) return callback('Invalid attachments', null)
+
+    self.attachments = attachments
 
     return callback(null, self)
 }

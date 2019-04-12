@@ -396,6 +396,19 @@ div#accountsTable_wrapper
   .ticket-note,
   .initial-issue
     position: relative
+    .issue-attachments
+      display: flex
+      padding: 10px 0 15px 0
+      .issue-attachments__attachement
+        cursor: pointer
+        width: 75px
+        height: 75px
+        background: #efefef
+        border-radius: 3px
+        margin-right: 25px
+        background-size: cover
+        background-repeat: no-repeat
+        background-position: center center
     .comment-actions,
     .edit-issue,
     .add-attachment
@@ -496,6 +509,10 @@ span.uk-form-danger
 .ticket-note,
 .initial-issue
   border-bottom: 1px solid $page_content_title_border_color !important
+
+.initial-issue
+  .issue-attachments
+    margin-left: 85px
 
 //Ticket Form
 form.ticket-form,

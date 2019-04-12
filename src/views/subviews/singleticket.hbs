@@ -273,20 +273,17 @@
                                 <time datetime="{{formatDate data.ticket.date "YYYY-MM-DD HH:mm"}}" >
                                     {{formatDate data.ticket.date (concat data.common.longDateFormat data.common.timeFormat true true)}}
                                 </time>
-                                <br>
-                                <ul class="attachments" data-ticketid="{{data.ticket._id}}">
-                                    {{#each data.ticket.attachments}}
-                                        <li>
-                                            <a href="{{path}}" class="no-ajaxy" target="_blank">{{name}}</a>
-                                            {{#canUserOrAdmin ../data.common.loggedInAccount "tickets:removeAttachment"}}
-                                                <a href="#" class="remove-attachment" data-attachmentId="{{_id}}"><i class="fa fa-remove"></i></a>
-                                            {{/canUserOrAdmin}}
-                                        </li>
-                                    {{/each}}
-                                </ul>
                                 <div class="issue-body">
                                     {{{data.ticket.issue}}}
                                 </div>
+                            </div>
+                            <div class="issue-attachments" data-ticketid="{{data.ticket._id}}">
+                                {{#each data.ticket.attachments}}
+                                    <div class="issue-attachments__attachement" style="background-image: url({{path}});" ng-click="openAttachment('{{path}}');"></div>
+                                    {{!-- {{#canUserOrAdmin ../data.common.loggedInAccount "tickets:removeAttachment"}}
+                                        <a href="#" class="remove-attachment" data-attachmentId="{{_id}}"><i class="fa fa-remove"></i></a>
+                                    {{/canUserOrAdmin}} --}}
+                                {{/each}}
                             </div>
                             {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role "tickets:update"}}
                                 <div class="edit-issue {{#compare data.ticket.status '==' 3}}hide{{/compare}}" ng-click="showEditWindow('issue', true);"><i class="material-icons">&#xE254;</i></div>
@@ -350,6 +347,10 @@
                                                         {{else}}
                                                             <p>{{{comment}}}</p>
                                                         {{/is}}
+                                                    </div>
+                                                    <div class="issue-attachments">
+                                                        <div class="issue-attachments__attachement"></div>
+                                                        <div class="issue-attachments__attachement"></div>
                                                     </div>
                                                 </div>
                                                 <div class="comment-actions {{#compare ../data.ticket.status '==' 3}}hide{{/compare}}">

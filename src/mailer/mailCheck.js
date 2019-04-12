@@ -133,6 +133,8 @@ function onImapReady() {
     mailCheck.Imap.destroy();
 }
 
+function randomFilename() { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); }
+
 function toUpper(thing) { return thing && thing.toUpperCase ? thing.toUpperCase() : thing;}
 
 function findAttachmentParts(struct, attachments) {
@@ -149,26 +151,32 @@ function findAttachmentParts(struct, attachments) {
     return attachments
 }
 
-function buildAttMessageFunction(attachment) {
-    var filename = attachment.params.name;
+function buildAttMessageFunction(attachment, sqNumber) {
+    var filename = randomFilename() + '.' + attachment.subtype;
     var encoding = attachment.encoding;
 
-    return function (msg, seqno) {
-        var prefix = '(#' + seqno + ') ';
-        
+    return function (msg) {
         msg.on('body', function(stream) {
-            if (!fs.existsSync('./uploads/'))
-                fs.mkdirSync('./uploads/');
+            if (!fs.existsSync('./tmp/'))
+                fs.mkdirSync('./tmp/');
 
-            var writeStream = fs.createWriteStream('./uploads/' + filename);
+            var writeStream = fs.createWriteStream('./tmp/' + filename);
             
             writeStream.on('finish', function() {
-                console.log(prefix + 'Done writing to file %s', filename);
+                var message = _.find(mailCheck.messages, function(message) { return message.sqNumber === sqNumber; });
+
+                if(message) {
+                    if(!message.attachments)
+                        message.attachments = [];
+                
+                    message.attachments.push({
+                        filename: filename,
+                        path: `./tmp/${filename}`
+                    });
+                }
             });
 
             if (toUpper(encoding) === 'BASE64') {
-                console.log('base64', base64);
-
                 stream.pipe(new base64.Base64Decode()).pipe(writeStream);
             } else  {
                 stream.pipe(writeStream);
@@ -176,7 +184,7 @@ function buildAttMessageFunction(attachment) {
         });
 
         msg.once('end', function() {
-            console.log(prefix + 'Finished attachment %s', filename);
+            console.log('Finished attachment %s', filename);
         });
     };
 }
@@ -218,7 +226,7 @@ function bindImapReady() {
                                     struct: true
                                 })
 
-                                f.on('message', function (msg) {
+                                f.on('message', function (msg, sqNumber) {
                                     msg.on('body', function (stream) {
                                         var buffer = ''
                                         
@@ -229,6 +237,10 @@ function bindImapReady() {
                                         stream.once('end', function () {
                                             simpleParser(buffer, function (err, mail) {
                                                 if (err) winston.warn(err)
+
+                                                if (sqNumber) {
+                                                    message.sqNumber = sqNumber
+                                                }
 
                                                 if (mail.headers.has('from')) {
                                                     message.from = mail.headers.get('from').value[0].address
@@ -265,22 +277,22 @@ function bindImapReady() {
                                                 mailCheck.messages.push(message)
                                             })
                                         })
+                                    
+                                        msg.once('attributes', function(attrs) {
+                                            var attachments = findAttachmentParts(attrs.struct);
+                                            
+                                            for (var i = 0; i < attachments.length; i++) {
+                                                var attachment = attachments[i];
+    
+                                                var f = mailCheck.Imap.fetch(attrs.uid, {
+                                                    bodies: [attachment.partID],
+                                                    struct: true
+                                                });
+    
+                                                f.on('message', buildAttMessageFunction(attachment, sqNumber));
+                                            }
+                                        });
                                     })
-
-                                    msg.once('attributes', function(attrs) {
-                                        var attachments = findAttachmentParts(attrs.struct);
-                                        
-                                        for (var i = 0; i < attachments.length; i++) {
-                                            var attachment = attachments[i];
-
-                                            var f = mailCheck.Imap.fetch(attrs.uid, {
-                                                bodies: [attachment.partID],
-                                                struct: true
-                                            });
-
-                                            f.on('message', buildAttMessageFunction(attachment));
-                                        }
-                                    });
                                 })
 
                                 f.on('end', function () {
@@ -453,7 +465,39 @@ function handleMessages(messages) {
                                             ticket: ticket
                                         })
 
-                                        return callback()
+                                        if(message.attachements && message.attachments.length > 0) {
+                                            const attachments = [];
+
+                                            if (!fs.existsSync(`./public/uploads/tickets/${ticket._id}`))
+                                                fs.mkdirSync(`./public/uploads/tickets/${ticket._id}`);
+        
+                                            for(var i = 0; i < message.attachments.length; i++) {
+                                                fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+                                                    if (err) 
+                                                        throw err
+                                                })
+
+                                                attachments.push({
+                                                    owner: message.owner._id,
+                                                    name: message.attachments[0].filename,
+                                                    date: new Date(),
+                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`,
+                                                    type: 'image'
+                                                })
+
+                                                if(attachments.length === message.attachments.length) {
+                                                    ticket.addAttachments(ticket._id, attachments, function() {
+                                                        ticket.save(function (err, t) {
+                                                            if (err) {
+                                                                winston.debug("Comment add failed!");
+                                                            } else {
+                                                                callback();
+                                                            }
+                                                        });
+                                                    });
+                                                }
+                                            }
+                                        }
                                     }
                                 )
                             } else {

@@ -62,4 +62,4 @@ public/uploads/assets/upload/
 
 stats\.json
 
-uploads/*
+tmp/*
