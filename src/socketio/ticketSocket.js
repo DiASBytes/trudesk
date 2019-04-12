@@ -56,12 +56,11 @@ events.onUpdateTicketStatus = function (socket) {
   socket.on('updateTicketStatus', function (data) {
     var ticketId = data.ticketId
     var ownerId = socket.request.user._id
-    var status = data.status
 
     ticketSchema.getTicketById(ticketId, function (err, ticket) {
       if (err) return true
 
-      ticket.setStatus(ownerId, status, function (err, t) {
+      ticket.setStatus(ownerId, data, function (err, t) {
         if (err) return true
 
         t.save(function (err) {
@@ -72,10 +71,10 @@ events.onUpdateTicketStatus = function (socket) {
           utils.sendToAllConnectedClients(io, 'updateTicketStatus', {
             tid: t._id,
             owner: t.owner,
-            status: status
+            status: data.status
           })
           
-          if(data.mailNotification) {
+          if(data.billingNotification) {
             var settings = require('../models/setting')
 
             settings.getSettingByName('onCloseTicketNotification:enable', function (err, setting) {
@@ -86,7 +85,7 @@ events.onUpdateTicketStatus = function (socket) {
                   if (err) return console.log(err)
                   
                   if(emails && emails.value !== '') {
-                    emitter.emit('ticket:updated:mail', ticket, data.mailData, emails.value);
+                    emitter.emit('ticket:updated:mail', ticket, data.billingData, emails.value);
                   }
                 })
               }

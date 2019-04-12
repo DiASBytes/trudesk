@@ -206,6 +206,17 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="uk-width-1-1 padding-left-right-15 billing-info{{#is data.ticket.status 3}} show{{/is}}">
+                            <div class="tru-card ticket-details" style="padding-bottom: 0 !important;">
+                                Billing
+                                <hr style="padding: 0; margin: 0;"/>
+                                <div class="billing-info__content" style="padding-top: 12px;">
+                                    <span><b>Billable:</b> {{#if data.ticket.closedBillingStatus}}Yes{{else}}No{{/if}}</span><br>
+                                    <span><b>Description:</b></span><br>
+                                    <span>{{data.ticket.closedBillingDescription}}</span>
+                                </div>
+                            </div>
+                        </div>
                         {{#canUserOrAdmin data.common.loggedInAccount "agent:*"}}
                             <div class="uk-width-1-1 padding-left-right-15">
                                 <div class="tru-card ticket-details" style="height: 250px; padding-right: 0 !important; padding-bottom: 0 !important;">

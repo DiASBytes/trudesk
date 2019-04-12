@@ -465,7 +465,7 @@ function handleMessages(messages) {
                                             ticket: ticket
                                         })
 
-                                        if(message.attachements && message.attachments.length > 0) {
+                                        if(message.attachments && message.attachments.length > 0) {
                                             const attachments = [];
 
                                             if (!fs.existsSync(`./public/uploads/tickets/${ticket._id}`))

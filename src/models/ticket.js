@@ -57,6 +57,8 @@ var COLLECTION = 'tickets'
  * @property {String} subject ```Required``` The subject of the ticket. (Overview)
  * @property {String} issue ```Required``` Detailed information about the ticket problem/task
  * @property {Date} closedDate show the datetime the ticket was moved to status 3.
+ * @property {Boolean} closedBillingStatus Billing of ticket
+ * @property {String} closedBillingDescription Description for closing
  * @property {Array} comments An array of {@link Comment} items
  * @property {Array} notes An array of {@link Comment} items for internal notes
  * @property {Array} attachments An Array of {@link Attachment} items
@@ -95,6 +97,8 @@ var ticketSchema = mongoose.Schema({
     subject: { type: String, required: true },
     issue: { type: String, required: true },
     closedDate: { type: Date },
+    closedBillingStatus: { type: Boolean },
+    closedBillingDescription: { type: String },
     comments: [commentSchema],
     notes: [noteSchema],
     attachments: [attachmentSchema],
@@ -187,21 +191,25 @@ ticketSchema.virtual('commentsAndNotes').get(function () {
  *      2 - Pending
  *      3 - Closed
  */
-ticketSchema.methods.setStatus = function (ownerId, status, callback) {
-    if (_.isUndefined(status)) return callback('Invalid Status', null)
+ticketSchema.methods.setStatus = function (ownerId, data, callback) {
+    if (_.isUndefined(data) && _.isUndefined(data.status)) return callback('Invalid Status', null)
 
     var self = this
 
-    if (status === 3) {
+    if (data.status === 3) {
+        self.closedBillingDescription = data.billingData.description
+        self.closedBillingStatus = data.billingData.billable
         self.closedDate = new Date()
     } else {
+        self.closedBillingDescription = null
+        self.closedBillingStatus = null
         self.closedDate = null
     }
 
-    self.status = status
+    self.status = data.status
     var historyItem = {
-        action: 'ticket:set:status:' + status,
-        description: 'Ticket Status set to: ' + statusToString(status),
+        action: 'ticket:set:status:' + data.status,
+        description: 'Ticket Status set to: ' + statusToString(data.status),
         owner: ownerId
     }
     self.history.push(historyItem)
