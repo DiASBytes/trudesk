@@ -406,6 +406,9 @@ define([
             description: $scope.cDescription
           });
 
+          $('.billing-info__content span:first-child').html('<b>Billable:</b> ' + ($scope.cBillable ? ($scope.cBillable === true ? 'Yes' : 'No') : 'No'));
+          $('.billing-info__content span:last-child').text($scope.cDescription);
+
           UIkit.modal('#closeTicketWindow').hide()
         }  
       }
@@ -540,6 +543,10 @@ define([
           iText = iText.trim()
           $('#issueText').val(iText)
         }
+      }
+
+      $scope.openAttachment = function(path) {
+        $window.open(path);
       }
 
       $scope.showUploadAttachment = function ($event) {

@@ -135,9 +135,9 @@ define('modules/ui', [
     })
   }
 
-  socketUi.sendUpdateTicketStatus = function (id, status, mailNotification = false, mailData) {
-    if(mailNotification) {
-      socket.emit('updateTicketStatus', { ticketId: id, status: status, mailNotification: mailNotification, mailData: mailData })
+  socketUi.sendUpdateTicketStatus = function (id, status, billingNotification = false, billingData) {
+    if(billingNotification) {
+      socket.emit('updateTicketStatus', { ticketId: id, status: status, billingNotification: billingNotification, billingData: billingData })
     } else {
       socket.emit('updateTicketStatus', { ticketId: id, status: status })
     }
@@ -192,12 +192,15 @@ define('modules/ui', [
         var ticketPriority = $('select#tPriority')
         var ticketGroup = $('select#tGroup')
         var ticketTags = $('div#editTags')
+        var billingInfo = $('.billing-info')
 
         var addAttachments = $('form#attachmentForm > div.add-attachment')
         var editIssue = $('div.initial-issue > div.edit-issue')
         var commentActions = $('div.comment-actions')
 
         if (status === 3) {
+          billingInfo.addClass('show')
+
           // Remove Comment Box
           if (ticketReply.length > 0) {
             ticketReply.addClass('hide')
@@ -238,6 +241,8 @@ define('modules/ui', [
             commentActions.addClass('hide')
           }
         } else {
+          billingInfo.removeClass('show')
+
           if (ticketReply.length > 0) {
             ticketReply.removeClass('hide')
           }

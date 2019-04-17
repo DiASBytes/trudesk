@@ -21,6 +21,9 @@ var simpleParser = require('mailparser').simpleParser
 var cheerio = require('cheerio')
 var replyParser = require('node-email-reply-parser')
 
+var fs = require('fs');
+var base64  = require('base64-stream')
+
 var emitter = require('../emitter')
 var userSchema = require('../models/user')
 var groupSchema = require('../models/group')
@@ -130,6 +133,62 @@ function onImapReady() {
     mailCheck.Imap.destroy();
 }
 
+function randomFilename() { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); }
+
+function toUpper(thing) { return thing && thing.toUpperCase ? thing.toUpperCase() : thing;}
+
+function findAttachmentParts(struct, attachments) {
+    attachments = attachments ||  []
+
+    struct.forEach((i) => {
+        if (Array.isArray(i)) {
+            findAttachmentParts(i, attachments)
+        } else if (i.disposition && ['INLINE', 'ATTACHMENT'].indexOf(toUpper(i.disposition.type)) > -1) {
+        attachments.push(i)
+        }
+    })
+
+    return attachments
+}
+
+function buildAttMessageFunction(attachment, sqNumber) {
+    var filename = randomFilename() + '.' + attachment.subtype;
+    var encoding = attachment.encoding;
+
+    return function (msg) {
+        msg.on('body', function(stream) {
+            if (!fs.existsSync('./tmp/'))
+                fs.mkdirSync('./tmp/');
+
+            var writeStream = fs.createWriteStream('./tmp/' + filename);
+            
+            writeStream.on('finish', function() {
+                var message = _.find(mailCheck.messages, function(message) { return message.sqNumber === sqNumber; });
+
+                if(message) {
+                    if(!message.attachments)
+                        message.attachments = [];
+                
+                    message.attachments.push({
+                        filename: filename,
+                        path: `./tmp/${filename}`
+                    });
+                }
+            });
+
+            if (toUpper(encoding) === 'BASE64') {
+                stream.pipe(new base64.Base64Decode()).pipe(writeStream);
+            } else  {
+                stream.pipe(writeStream);
+            }
+        });
+
+        msg.once('end', function() {
+            console.log('Finished attachment %s', filename);
+        });
+    };
+}
+
 function bindImapReady() {
     try {
         mailCheck.Imap.on('ready', function () {
@@ -163,12 +222,14 @@ function bindImapReady() {
                                 var message = {}
 
                                 var f = mailCheck.Imap.fetch(results, {
-                                    bodies: ''
+                                    bodies: '',
+                                    struct: true
                                 })
 
-                                f.on('message', function (msg) {
+                                f.on('message', function (msg, sqNumber) {
                                     msg.on('body', function (stream) {
                                         var buffer = ''
+                                        
                                         stream.on('data', function (chunk) {
                                             buffer += chunk.toString('utf8')
                                         })
@@ -176,6 +237,10 @@ function bindImapReady() {
                                         stream.once('end', function () {
                                             simpleParser(buffer, function (err, mail) {
                                                 if (err) winston.warn(err)
+
+                                                if (sqNumber) {
+                                                    message.sqNumber = sqNumber
+                                                }
 
                                                 if (mail.headers.has('from')) {
                                                     message.from = mail.headers.get('from').value[0].address
@@ -212,6 +277,21 @@ function bindImapReady() {
                                                 mailCheck.messages.push(message)
                                             })
                                         })
+                                    
+                                        msg.once('attributes', function(attrs) {
+                                            var attachments = findAttachmentParts(attrs.struct);
+                                            
+                                            for (var i = 0; i < attachments.length; i++) {
+                                                var attachment = attachments[i];
+    
+                                                var f = mailCheck.Imap.fetch(attrs.uid, {
+                                                    bodies: [attachment.partID],
+                                                    struct: true
+                                                });
+    
+                                                f.on('message', buildAttMessageFunction(attachment, sqNumber));
+                                            }
+                                        });
                                     })
                                 })
 
@@ -385,16 +465,79 @@ function handleMessages(messages) {
                                             ticket: ticket
                                         })
 
-                                        return callback()
+                                        if(message.attachments && message.attachments.length > 0) {
+                                            const attachments = [];
+
+                                            if (!fs.existsSync(`./public/uploads/tickets/${ticket._id}`))
+                                                fs.mkdirSync(`./public/uploads/tickets/${ticket._id}`);
+        
+                                            for(var i = 0; i < message.attachments.length; i++) {
+                                                fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+                                                    if (err) 
+                                                        throw err
+                                                })
+
+                                                attachments.push({
+                                                    owner: message.owner._id,
+                                                    name: message.attachments[0].filename,
+                                                    date: new Date(),
+                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`,
+                                                    type: 'image'
+                                                })
+
+                                                if(attachments.length === message.attachments.length) {
+                                                    ticket.addAttachments(ticket._id, attachments, function() {
+                                                        ticket.save(function (err, t) {
+                                                            if (err) {
+                                                                winston.debug("Attachement add failed!");
+                                                            } else {
+                                                                callback();
+                                                            }
+                                                        });
+                                                    });
+                                                }
+                                            }
+                                        }
                                     }
                                 )
                             } else {
                                 message.ticket.addComment(message.replyUser.id, message.reply, function () {
-                                    message.ticket.save(function (err, t) {
-                                        if (err) {
-                                            winston.debug("Comment add failed!");
-                                        } else {
-                                            winston.debug("Comment add success!");
+                                    message.ticket.save(function (err, ticket) {
+                                        if (err)
+                                            return;
+
+                                        if(message.attachments && message.attachments.length > 0) {
+                                            const attachments = [];
+
+                                            if (!fs.existsSync(`./public/uploads/tickets/${ticket._id}`))
+                                                fs.mkdirSync(`./public/uploads/tickets/${ticket._id}`);
+        
+                                            for(var i = 0; i < message.attachments.length; i++) {
+                                                fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+                                                    if (err) 
+                                                        throw err
+                                                })
+
+                                                attachments.push({
+                                                    owner: message.replyUser.id,
+                                                    name: message.attachments[0].filename,
+                                                    date: new Date(),
+                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`,
+                                                    type: 'image'
+                                                })
+
+                                                if(attachments.length === message.attachments.length) {
+                                                    ticket.addAttachmentsToComment(ticket._id, attachments, function() {
+                                                        ticket.save(function (err, t) {
+                                                            if (err) {
+                                                                winston.debug("Comment add failed!");
+                                                            } else {
+                                                                callback();
+                                                            }
+                                                        });
+                                                    });
+                                                }
+                                            }
                                         }
                                     });
                                 });

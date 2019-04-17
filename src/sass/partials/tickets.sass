@@ -24,6 +24,11 @@ div#ticketTable_wrapper,
 div#accountsTable_wrapper
   margin-bottom: 0
 
+.billing-info
+  display: none
+  &.show
+    display: block
+
 .ticket-status span
   display: block
   width: 65px
@@ -396,9 +401,32 @@ div#accountsTable_wrapper
   .ticket-note,
   .initial-issue
     position: relative
+    .issue-body
+      margin-top: 20px
+    .issue-attachments
+      display: flex
+      padding: 10px 0 15px 0
+      .issue-attachments__attachement
+        cursor: pointer
+        width: 75px
+        height: 75px
+        background: #efefef
+        border-radius: 3px
+        margin-right: 25px
+        // background-size: cover
+        // background-repeat: no-repeat
+        // background-position: center center
+        display: flex
+        align-items: center
+        justify-content: center
+        span
+          color: #545A63
+          font-weight: bold
+          text-transform: uppercase
     .comment-actions,
     .edit-issue,
     .add-attachment
+      display: none
       position: absolute
       right: 25px
       top: 15px
@@ -495,6 +523,10 @@ span.uk-form-danger
 .ticket-note,
 .initial-issue
   border-bottom: 1px solid $page_content_title_border_color !important
+
+.initial-issue
+  .issue-attachments
+    margin-left: 85px
 
 //Ticket Form
 form.ticket-form,

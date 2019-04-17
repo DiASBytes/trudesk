@@ -139,6 +139,8 @@ var notifications = require('../notifications') // Load Push Events
                       // .finally(function () {
                       //   return c()
                       // })
+
+                      util.sendToAllConnectedClients(io, 'ticket:created', ticket)
                     })
                   }
                 )
@@ -325,7 +327,7 @@ var notifications = require('../notifications') // Load Push Events
     io.sockets.emit('ticket:updategrid')
   })
 
-  emitter.on('ticket:updated:mail', function (ticket, mailData, emails) {
+  emitter.on('ticket:updated:mail', function (ticket, billingData, emails) {
     var mailer = require('../mailer')
 
     var email = new Email({
@@ -340,7 +342,7 @@ var notifications = require('../notifications') // Load Push Events
     email
       .render('ticket-closed', {
         ticket: ticket,
-        data: mailData
+        data: billingData
       })
       .then(function (html) {
         var mailOptions = {

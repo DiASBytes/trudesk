@@ -23,6 +23,7 @@
 var _ = require('lodash')
 var moment = require('moment-timezone')
 require('moment-duration-format')(moment)
+var path = require('path')
 
 // The module to be exported
 var helpers = {
@@ -830,6 +831,14 @@ var helpers = {
 
     if (hasComments || hasNotes) return options.fn(this)
     return options.inverse(this)
+  },
+
+  extname: function(filepath) {
+    if (typeof filepath !== 'string') {
+      return false;
+    }
+    
+    return path.extname(filepath);
   }
 }
 

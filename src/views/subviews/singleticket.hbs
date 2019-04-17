@@ -206,6 +206,17 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="uk-width-1-1 padding-left-right-15 billing-info{{#is data.ticket.status 3}} show{{/is}}">
+                            <div class="tru-card ticket-details" style="padding-bottom: 0 !important;">
+                                Billing
+                                <hr style="padding: 0; margin: 0;"/>
+                                <div class="billing-info__content" style="padding-top: 12px;">
+                                    <span><b>Billable:</b> {{#if data.ticket.closedBillingStatus}}Yes{{else}}No{{/if}}</span><br>
+                                    <span><b>Description:</b></span><br>
+                                    <span>{{data.ticket.closedBillingDescription}}</span>
+                                </div>
+                            </div>
+                        </div>
                         {{#canUserOrAdmin data.common.loggedInAccount "agent:*"}}
                             <div class="uk-width-1-1 padding-left-right-15">
                                 <div class="tru-card ticket-details" style="height: 250px; padding-right: 0 !important; padding-bottom: 0 !important;">
@@ -273,20 +284,19 @@
                                 <time datetime="{{formatDate data.ticket.date "YYYY-MM-DD HH:mm"}}" >
                                     {{formatDate data.ticket.date (concat data.common.longDateFormat data.common.timeFormat true true)}}
                                 </time>
-                                <br>
-                                <ul class="attachments" data-ticketid="{{data.ticket._id}}">
-                                    {{#each data.ticket.attachments}}
-                                        <li>
-                                            <a href="{{path}}" class="no-ajaxy" target="_blank">{{name}}</a>
-                                            {{#canUserOrAdmin ../data.common.loggedInAccount "tickets:removeAttachment"}}
-                                                <a href="#" class="remove-attachment" data-attachmentId="{{_id}}"><i class="fa fa-remove"></i></a>
-                                            {{/canUserOrAdmin}}
-                                        </li>
-                                    {{/each}}
-                                </ul>
                                 <div class="issue-body">
                                     {{{data.ticket.issue}}}
                                 </div>
+                            </div>
+                            <div class="issue-attachments" data-ticketid="{{data.ticket._id}}">
+                                {{#each data.ticket.attachments}}
+                                    <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
+                                        <span>{{extname path}}</span>
+                                    </div>
+                                    {{!-- {{#canUserOrAdmin ../data.common.loggedInAccount "tickets:removeAttachment"}}
+                                        <a href="#" class="remove-attachment" data-attachmentId="{{_id}}"><i class="fa fa-remove"></i></a>
+                                    {{/canUserOrAdmin}} --}}
+                                {{/each}}
                             </div>
                             {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role "tickets:update"}}
                                 <div class="edit-issue {{#compare data.ticket.status '==' 3}}hide{{/compare}}" ng-click="showEditWindow('issue', true);"><i class="material-icons">&#xE254;</i></div>
@@ -299,7 +309,7 @@
                                 </form>
                             {{/hasPermOverRole}}
                         </div>
-                        <div class="tru-tabs comments-notes-tab uk-clearfix {{#compare (size data.ticket.commentsAndNotes) '<' 1}} hide {{/compare}}" style="padding: 20px 0 !important;" data-ticketId="{{data.ticket._id}}">
+                        <div class="tru-tabs comments-notes-tab uk-clearfix {{#compare (size data.ticket.commentsAndNotes) '<' 1}} hide {{/compare}}" style="padding: 10px 0 20px 0 !important;" data-ticketId="{{data.ticket._id}}">
                             <div class="tru-tab-selectors tru-tab-selectors--single-ticket">
                                 <a id="tab-all-comments" href="#" class="tru-tab-selector no-ajaxy active" data-tabid="0" data-ticketid="{{data.ticket._id}}">All
                                     <span class="uk-badge uk-badge-grey uk-badge-small">{{size data.ticket.commentsAndNotes}}</span>
@@ -350,6 +360,13 @@
                                                         {{else}}
                                                             <p>{{{comment}}}</p>
                                                         {{/is}}
+                                                    </div>
+                                                    <div class="issue-attachments">
+                                                        {{#each attachments}}
+                                                            <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
+                                                                <span>{{extname path}}</span>
+                                                            </div>
+                                                        {{/each}}
                                                     </div>
                                                 </div>
                                                 <div class="comment-actions {{#compare ../data.ticket.status '==' 3}}hide{{/compare}}">
@@ -424,7 +441,14 @@
                                                     {{calendarDate date}}
                                                 </time>
                                                 <div class="comment-body">
-                                                        <p>{{{comment}}}</p>
+                                                    <p>{{{comment}}}</p>
+                                                </div>
+                                                <div class="issue-attachments">
+                                                    {{#each attachments}}
+                                                        <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
+                                                            <span>{{extname path}}</span>
+                                                        </div>
+                                                    {{/each}}
                                                 </div>
                                             </div>
                                             <div class="comment-actions {{#compare ../data.ticket.status '==' 3}}hide{{/compare}}">
