@@ -44,76 +44,76 @@ var apiUsers = {}
  }
  */
 apiUsers.getWithLimit = function (req, res) {
-  var limit = 10
-  if (!_.isUndefined(req.query.limit)) {
-    limit = parseInt(req.query.limit)
-  }
-  var page = parseInt(req.query.page)
-  var search = req.query.search
-
-  var obj = {
-    limit: limit,
-    page: page,
-    search: search
-  }
-
-  async.waterfall(
-    [
-      function (callback) {
-        UserSchema.getUserWithObject(obj, function (err, results) {
-          callback(err, results)
-        })
-      },
-      function (users, callback) {
-        var result = []
-
-        async.waterfall(
-          [
-            function (cc) {
-              groupSchema.getAllGroups(function (err, grps) {
-                if (err) return cc(err)
-                return cc(null, grps)
-              })
-            },
-            function (grps, cc) {
-              async.eachSeries(
-                users,
-                function (u, c) {
-                  var user = u.toObject()
-
-                  var groups = _.filter(grps, function (g) {
-                    return _.some(g.members, function (m) {
-                      return m._id.toString() === user._id.toString()
-                    })
-                  })
-
-                  user.groups = _.map(groups, function (group) {
-                    return { name: group.name, _id: group._id }
-                  })
-
-                  result.push(stripUserFields(user))
-                  return c()
-                },
-                function (err) {
-                  if (err) return callback(err)
-                  return cc(null, result)
-                }
-              )
-            }
-          ],
-          function (err, results) {
-            if (err) return callback(err)
-            return callback(null, results)
-          }
-        )
-      }
-    ],
-    function (err, rr) {
-      if (err) return res.status(400).json({ error: 'Error: ' + err.message })
-
-      return res.json({ success: true, count: _.size(rr), users: rr })
+    var limit = 10
+    if (!_.isUndefined(req.query.limit)) {
+        limit = parseInt(req.query.limit)
     }
-  )
+    var page = parseInt(req.query.page)
+    var search = req.query.search
+
+    var obj = {
+        limit: limit,
+        page: page,
+        search: search
+    }
+
+    async.waterfall(
+        [
+            function (callback) {
+                UserSchema.getUserWithObject(obj, function (err, results) {
+                    callback(err, results)
+                })
+            },
+            function (users, callback) {
+                var result = []
+
+                async.waterfall(
+                    [
+                        function (cc) {
+                            groupSchema.getAllGroups(function (err, grps) {
+                                if (err) return cc(err)
+                                return cc(null, grps)
+                            })
+                        },
+                        function (grps, cc) {
+                            async.eachSeries(
+                                users,
+                                function (u, c) {
+                                    var user = u.toObject()
+
+                                    var groups = _.filter(grps, function (g) {
+                                        return _.some(g.members, function (m) {
+                                            return m._id.toString() === user._id.toString()
+                                        })
+                                    })
+
+                                    user.groups = _.map(groups, function (group) {
+                                        return { name: group.name, _id: group._id }
+                                    })
+
+                                    result.push(stripUserFields(user))
+                                    return c()
+                                },
+                                function (err) {
+                                    if (err) return callback(err)
+                                    return cc(null, result)
+                                }
+                            )
+                        }
+                    ],
+                    function (err, results) {
+                        if (err) return callback(err)
+                        return callback(null, results)
+                    }
+                )
+            }
+        ],
+        function (err, rr) {
+            if (err) return res.status(400).json({ error: 'Error: ' + err.message })
+
+            return res.json({ success: true, count: _.size(rr), users: rr })
+        }
+    )
 }
 
 /**
@@ -148,91 +148,196 @@ apiUsers.getWithLimit = function (req, res) {
  }
  */
 apiUsers.create = function (req, res) {
-  var response = {}
-  response.success = true
+    var response = {}
+    response.success = true
 
-  var postData = req.body
+    var postData = req.body
 
-  if (_.isUndefined(postData) || !_.isObject(postData)) {
-    return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-  }
-
-  var propCheck = ['aUsername', 'aPass', 'aPassConfirm', 'aFullname', 'aEmail', 'aRole']
-
-  if (
-    !_.every(propCheck, function (x) {
-      return x in postData
-    })
-  ) {
-    return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-  }
-
-  if (_.isUndefined(postData.aGrps) || _.isNull(postData.aGrps) || !_.isArray(postData.aGrps)) {
-    return res.status(400).json({ success: false, error: 'Invalid Group Array' })
-  }
-
-  if (postData.aPass !== postData.aPassConfirm)
-    return res.status(400).json({ success: false, error: 'Invalid Password Match' })
-
-  var Chance = require('chance')
-  var chance = new Chance()
-
-  var account = new UserSchema({
-    username: postData.aUsername,
-    password: postData.aPass,
-    fullname: postData.aFullname,
-    email: postData.aEmail,
-    accessToken: chance.hash(),
-    role: postData.aRole
-  })
-
-  if (postData.aTitle) {
-    account.title = postData.aTitle
-  }
-
-  account.save(function (err, a) {
-    if (err) {
-      response.success = false
-      response.error = err
-      winston.debug(response)
-      return res.status(400).json(response)
+    if (_.isUndefined(postData) || !_.isObject(postData)) {
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
     }
 
-    a.populate('role', function (err, populatedAccount) {
-      if (err) return res.status(500).json({ success: false, error: err })
+    var propCheck = ['aUsername', 'aPass', 'aPassConfirm', 'aFullname', 'aEmail', 'aRole']
 
-      response.account = populatedAccount.toObject()
-      delete response.account.password
+    if (
+        !_.every(propCheck, function (x) {
+            return x in postData
+        })
+    ) {
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    }
 
-      var groups = []
+    if (_.isUndefined(postData.aGrps) || _.isNull(postData.aGrps) || !_.isArray(postData.aGrps)) {
+        return res.status(400).json({ success: false, error: 'Invalid Group Array' })
+    }
 
-      async.each(
-        postData.aGrps,
-        function (id, done) {
-          if (_.isUndefined(id)) return done(null)
-          groupSchema.getGroupById(id, function (err, grp) {
-            if (err) return done(err)
-            if (!grp) return done('Invalid Group (' + id + ') - Group not found. Check Group ID')
+    if (postData.aPass !== postData.aPassConfirm)
+        return res.status(400).json({ success: false, error: 'Invalid Password Match' })
 
-            grp.addMember(a._id, function (err, success) {
-              if (err) return done(err)
+    var Chance = require('chance')
+    var chance = new Chance()
 
-              grp.save(function (err) {
-                if (err) return done(err)
-                groups.push(grp)
-                done(null, success)
-              })
-            })
-          })
-        },
-        function (err) {
-          if (err) return res.status(400).json({ success: false, error: err })
-          response.account.groups = groups
-          return res.json(response)
-        }
-      )
+    var account = new UserSchema({
+        username: postData.aUsername,
+        password: postData.aPass,
+        fullname: postData.aFullname,
+        email: postData.aEmail,
+        accessToken: chance.hash(),
+        role: postData.aRole
     })
-  })
+
+    if (postData.aTitle) {
+        account.title = postData.aTitle
+    }
+
+    account.save(function (err, a) {
+        if (err) {
+            response.success = false
+            response.error = err
+            winston.debug(response)
+            return res.status(400).json(response)
+        }
+
+        a.populate('role', function (err, populatedAccount) {
+            if (err) return res.status(500).json({ success: false, error: err })
+
+            response.account = populatedAccount.toObject()
+            delete response.account.password
+
+            var groups = []
+
+            async.each(
+                postData.aGrps,
+                function (id, done) {
+                    if (_.isUndefined(id)) return done(null)
+                    groupSchema.getGroupById(id, function (err, grp) {
+                        if (err) return done(err)
+                        if (!grp) return done('Invalid Group (' + id + ') - Group not found. Check Group ID')
+
+                        grp.addMember(a._id, function (err, success) {
+                            if (err) return done(err)
+
+                            grp.save(function (err) {
+                                if (err) return done(err)
+                                groups.push(grp)
+                                done(null, success)
+                            })
+                        })
+                    })
+                },
+                function (err) {
+                    if (err) return res.status(400).json({ success: false, error: err })
+                    response.account.groups = groups
+                    return res.json(response)
+                }
+            )
+        })
+    })
+}
+
+/**
+ * @api {post} /api/v1/users/createFromEmail Create Account From Email
+ * @apiName createAccount
+ * @apiDescription Creates an account with the given post data.
+ * @apiVersion 0.1.7
+ * @apiGroup User
+ * @apiHeader {string} accesstoken The access token for the logged in user
+ *
+ * @apiParamExample {json} Request-Example:
+ * {
+ *      "aEmail":       "email@email.com"
+ * }
+ *
+ * @apiSuccess {boolean} success If the Request was a success
+ * @apiSuccess {object} error Error, if occurred
+ * @apiSuccess {object} account Saved Account Object
+ *
+ * @apiError InvalidPostData The data was invalid
+ * @apiErrorExample
+ *      HTTP/1.1 400 Bad Request
+ {
+     "error": "Invalid Post Data"
+ }
+ */
+apiUsers.createFromEmail = function (req, res) {
+    var response = {}
+    response.success = true
+
+    var postData = req.body
+
+    if (_.isUndefined(postData) || !_.isObject(postData)) {
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    }
+
+    var propCheck = ['aEmail']
+
+    if (
+        !_.every(propCheck, function (x) {
+            return x in postData
+        })
+    ) {
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    }
+
+    UserSchema.createUserFromEmail(postData.aEmail, function (err, response) {
+        if (err) return res.status(400).json({ success: false, error: err })
+
+        return res.json(response);
+    });
+}
+
+/**
+ * @api {post} /api/v1/users/softDelete Create Account From Email
+ * @apiName softDeleteAccount
+ * @apiDescription Soft deletes an account
+ * @apiVersion 0.1.7
+ * @apiGroup User
+ * @apiHeader {string} accesstoken The access token for the logged in user
+ *
+ * @apiParamExample {json} Request-Example:
+ * {
+ *      "id":       "5cb6e87c003a55180ac91f79"
+ * }
+ *
+ * @apiSuccess {boolean} success If the Request was a success
+ * @apiSuccess {object} error Error, if occurred
+ *
+ * @apiError InvalidPostData The data was invalid
+ * @apiErrorExample
+ *      HTTP/1.1 400 Bad Request
+ {
+     "error": "Invalid Post Data"
+ }
+ */
+apiUsers.softDelete = function (req, res) {
+    var response = {}
+    response.success = true
+
+    var postData = req.body
+
+    if (_.isUndefined(postData) || !_.isObject(postData)) {
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    }
+
+    var propCheck = ['id']
+
+    if (
+        !_.every(propCheck, function (x) {
+            return x in postData
+        })
+    ) {
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    }
+
+    UserSchema.getUser(postData.id, function (err, user) {
+        if (err) return res.status(404).json({ success: false, error: 'User not found' });
+
+        user.softDelete(function (err, success) {
+            if (err) return res.status(400).json({ success: false, error: 'Could not soft delete user' });
+
+            return res.json(success);
+        });
+    });
 }
 
 /**
@@ -262,72 +367,72 @@ apiUsers.create = function (req, res) {
  }
  */
 apiUsers.createPublicAccount = function (req, res) {
-  var response = {}
-  response.success = true
-  var postData = req.body
-  if (!_.isObject(postData)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    var response = {}
+    response.success = true
+    var postData = req.body
+    if (!_.isObject(postData)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  var user, group
+    var user, group
 
-  async.waterfall(
-    [
-      function (next) {
-        var SettingSchema = require('../../../models/setting')
-        SettingSchema.getSetting('role:user:default', function (err, roleDefault) {
-          if (err) return next(err)
-          if (!roleDefault) {
-            winston.error('No Default User Role Set. (Settings > Permissions > Default User Role)')
-            return next({ message: 'No Default Role Set. Please contact administrator.' })
-          }
+    async.waterfall(
+        [
+            function (next) {
+                var SettingSchema = require('../../../models/setting')
+                SettingSchema.getSetting('role:user:default', function (err, roleDefault) {
+                    if (err) return next(err)
+                    if (!roleDefault) {
+                        winston.error('No Default User Role Set. (Settings > Permissions > Default User Role)')
+                        return next({ message: 'No Default Role Set. Please contact administrator.' })
+                    }
 
-          return next(null, roleDefault)
-        })
-      },
-      function (roleDefault, next) {
-        var UserSchema = require('../../../models/user')
-        user = new UserSchema({
-          username: postData.user.email,
-          password: postData.user.password,
-          fullname: postData.user.fullname,
-          email: postData.user.email,
-          role: roleDefault.value
-        })
+                    return next(null, roleDefault)
+                })
+            },
+            function (roleDefault, next) {
+                var UserSchema = require('../../../models/user')
+                user = new UserSchema({
+                    username: postData.user.email,
+                    password: postData.user.password,
+                    fullname: postData.user.fullname,
+                    email: postData.user.email,
+                    role: roleDefault.value
+                })
 
-        user.save(function (err, savedUser) {
-          if (err) return next(err)
+                user.save(function (err, savedUser) {
+                    if (err) return next(err)
 
-          return next(null, savedUser)
-        })
-      },
-      function (savedUser, next) {
-        var GroupSchema = require('../../../models/group')
-        group = new GroupSchema({
-          name: savedUser.email,
-          members: [savedUser._id],
-          sendMailTo: [savedUser._id],
-          public: true
-        })
+                    return next(null, savedUser)
+                })
+            },
+            function (savedUser, next) {
+                var GroupSchema = require('../../../models/group')
+                group = new GroupSchema({
+                    name: savedUser.email,
+                    members: [savedUser._id],
+                    sendMailTo: [savedUser._id],
+                    public: true
+                })
 
-        group.save(function (err, savedGroup) {
-          if (err) return next(err)
+                group.save(function (err, savedGroup) {
+                    if (err) return next(err)
 
-          return next(null, { user: savedUser, group: savedGroup })
-        })
-      }
-    ],
-    function (err, result) {
-      if (err) winston.debug(err)
-      if (err) return res.status(400).json({ success: false, error: err.message })
+                    return next(null, { user: savedUser, group: savedGroup })
+                })
+            }
+        ],
+        function (err, result) {
+            if (err) winston.debug(err)
+            if (err) return res.status(400).json({ success: false, error: err.message })
 
-      delete result.user.password
-      result.user.password = undefined
+            delete result.user.password
+            result.user.password = undefined
 
-      return res.json({
-        success: true,
-        userData: { user: result.user, group: result.group }
-      })
-    }
-  )
+            return res.json({
+                success: true,
+                userData: { user: result.user, group: result.group }
+            })
+        }
+    )
 }
 
 /**
@@ -360,131 +465,131 @@ apiUsers.createPublicAccount = function (req, res) {
  }
  */
 apiUsers.update = function (req, res) {
-  var username = req.params.username
-  if (_.isNull(username) || _.isUndefined(username))
-    return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    var username = req.params.username
+    if (_.isNull(username) || _.isUndefined(username))
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  var data = req.body
-  // saveGroups - Profile saving where groups are not sent
-  var saveGroups = data.saveGroups || true
-  var obj = {
-    fullname: data.aFullname,
-    title: data.aTitle,
-    password: data.aPass,
-    passconfirm: data.aPassConfirm,
-    email: data.aEmail,
-    role: data.aRole,
-    groups: data.aGrps
-  }
-
-  if (_.isNull(obj.groups) || _.isUndefined(obj.groups)) {
-    obj.groups = []
-  } else if (!_.isArray(obj.groups)) {
-    obj.groups = [obj.groups]
-  }
-
-  async.series(
-    {
-      user: function (done) {
-        UserSchema.getUserByUsername(username, function (err, user) {
-          if (err) return done(err)
-          if (!user) return done('Invalid User Object')
-
-          obj._id = user._id
-
-          if (
-            !_.isUndefined(obj.password) &&
-            !_.isEmpty(obj.password) &&
-            !_.isUndefined(obj.passconfirm) &&
-            !_.isEmpty(obj.passconfirm)
-          ) {
-            if (obj.password === obj.passconfirm) {
-              user.password = obj.password
-            }
-          }
-
-          if (!_.isUndefined(obj.fullname) && obj.fullname.length > 0) user.fullname = obj.fullname
-          if (!_.isUndefined(obj.email) && obj.email.length > 0) user.email = obj.email
-          if (!_.isUndefined(obj.title) && obj.title.length > 0) user.title = obj.title
-          if (!_.isUndefined(obj.role) && obj.role.length > 0) user.role = obj.role
-
-          user.save(function (err, nUser) {
-            if (err) return done(err)
-
-            nUser.populate('role', function (err, populatedUser) {
-              if (err) return done(err)
-              var resUser = stripUserFields(populatedUser)
-
-              return done(null, resUser)
-            })
-          })
-        })
-      },
-      groups: function (done) {
-        if (!saveGroups) return done()
-        var userGroups = []
-        groupSchema.getAllGroups(function (err, groups) {
-          if (err) return done(err)
-          async.each(
-            groups,
-            function (grp, callback) {
-              if (_.includes(obj.groups, grp._id.toString())) {
-                if (grp.isMember(obj._id)) {
-                  userGroups.push(grp)
-                  return callback()
-                }
-                grp.addMember(obj._id, function (err, result) {
-                  if (err) return callback(err)
-
-                  if (result) {
-                    grp.save(function (err) {
-                      if (err) return callback(err)
-                      userGroups.push(grp)
-                      return callback()
-                    })
-                  } else {
-                    return callback()
-                  }
-                })
-              } else {
-                // Remove Member from group
-                grp.removeMember(obj._id, function (err, result) {
-                  if (err) return callback(err)
-                  if (result) {
-                    grp.save(function (err) {
-                      if (err) return callback(err)
-
-                      return callback()
-                    })
-                  } else {
-                    return callback()
-                  }
-                })
-              }
-            },
-            function (err) {
-              if (err) return done(err)
-
-              return done(null, userGroups)
-            }
-          )
-        })
-      }
-    },
-    function (err, results) {
-      if (err) {
-        winston.debug(err)
-        return res.status(400).json({ success: false, error: err })
-      }
-
-      var user = results.user.toJSON()
-      user.groups = results.groups.map(function (g) {
-        return { _id: g._id, name: g.name }
-      })
-
-      return res.json({ success: true, user: user })
+    var data = req.body
+    // saveGroups - Profile saving where groups are not sent
+    var saveGroups = data.saveGroups || true
+    var obj = {
+        fullname: data.aFullname,
+        title: data.aTitle,
+        password: data.aPass,
+        passconfirm: data.aPassConfirm,
+        email: data.aEmail,
+        role: data.aRole,
+        groups: data.aGrps
     }
-  )
+
+    if (_.isNull(obj.groups) || _.isUndefined(obj.groups)) {
+        obj.groups = []
+    } else if (!_.isArray(obj.groups)) {
+        obj.groups = [obj.groups]
+    }
+
+    async.series(
+        {
+            user: function (done) {
+                UserSchema.getUserByUsername(username, function (err, user) {
+                    if (err) return done(err)
+                    if (!user) return done('Invalid User Object')
+
+                    obj._id = user._id
+
+                    if (
+                        !_.isUndefined(obj.password) &&
+                        !_.isEmpty(obj.password) &&
+                        !_.isUndefined(obj.passconfirm) &&
+                        !_.isEmpty(obj.passconfirm)
+                    ) {
+                        if (obj.password === obj.passconfirm) {
+                            user.password = obj.password
+                        }
+                    }
+
+                    if (!_.isUndefined(obj.fullname) && obj.fullname.length > 0) user.fullname = obj.fullname
+                    if (!_.isUndefined(obj.email) && obj.email.length > 0) user.email = obj.email
+                    if (!_.isUndefined(obj.title) && obj.title.length > 0) user.title = obj.title
+                    if (!_.isUndefined(obj.role) && obj.role.length > 0) user.role = obj.role
+
+                    user.save(function (err, nUser) {
+                        if (err) return done(err)
+
+                        nUser.populate('role', function (err, populatedUser) {
+                            if (err) return done(err)
+                            var resUser = stripUserFields(populatedUser)
+
+                            return done(null, resUser)
+                        })
+                    })
+                })
+            },
+            groups: function (done) {
+                if (!saveGroups) return done()
+                var userGroups = []
+                groupSchema.getAllGroups(function (err, groups) {
+                    if (err) return done(err)
+                    async.each(
+                        groups,
+                        function (grp, callback) {
+                            if (_.includes(obj.groups, grp._id.toString())) {
+                                if (grp.isMember(obj._id)) {
+                                    userGroups.push(grp)
+                                    return callback()
+                                }
+                                grp.addMember(obj._id, function (err, result) {
+                                    if (err) return callback(err)
+
+                                    if (result) {
+                                        grp.save(function (err) {
+                                            if (err) return callback(err)
+                                            userGroups.push(grp)
+                                            return callback()
+                                        })
+                                    } else {
+                                        return callback()
+                                    }
+                                })
+                            } else {
+                                // Remove Member from group
+                                grp.removeMember(obj._id, function (err, result) {
+                                    if (err) return callback(err)
+                                    if (result) {
+                                        grp.save(function (err) {
+                                            if (err) return callback(err)
+
+                                            return callback()
+                                        })
+                                    } else {
+                                        return callback()
+                                    }
+                                })
+                            }
+                        },
+                        function (err) {
+                            if (err) return done(err)
+
+                            return done(null, userGroups)
+                        }
+                    )
+                })
+            }
+        },
+        function (err, results) {
+            if (err) {
+                winston.debug(err)
+                return res.status(400).json({ success: false, error: err })
+            }
+
+            var user = results.user.toJSON()
+            user.groups = results.groups.map(function (g) {
+                return { _id: g._id, name: g.name }
+            })
+
+            return res.json({ success: true, user: user })
+        }
+    )
 }
 
 /**
@@ -513,38 +618,38 @@ apiUsers.update = function (req, res) {
  }
  */
 apiUsers.updatePreferences = function (req, res) {
-  var username = req.params.username
-  if (typeof username === 'undefined') {
-    return res.status(400).json({ success: false, error: 'Invalid Request' })
-  }
-
-  var data = req.body
-  var preference = data.preference
-  var value = data.value
-
-  UserSchema.getUserByUsername(username, function (err, user) {
-    if (err) {
-      winston.warn('[API:USERS:UpdatePreferences] Error= ' + err)
-      return res.status(400).json({ success: false, error: err })
+    var username = req.params.username
+    if (typeof username === 'undefined') {
+        return res.status(400).json({ success: false, error: 'Invalid Request' })
     }
 
-    if (_.isNull(user.preferences)) {
-      user.preferences = {}
-    }
+    var data = req.body
+    var preference = data.preference
+    var value = data.value
 
-    user.preferences[preference] = value
+    UserSchema.getUserByUsername(username, function (err, user) {
+        if (err) {
+            winston.warn('[API:USERS:UpdatePreferences] Error= ' + err)
+            return res.status(400).json({ success: false, error: err })
+        }
 
-    user.save(function (err, u) {
-      if (err) {
-        winston.warn('[API:USERS:UpdatePreferences] Error= ' + err)
-        return res.status(400).json({ success: false, error: err })
-      }
+        if (_.isNull(user.preferences)) {
+            user.preferences = {}
+        }
 
-      var resUser = stripUserFields(u)
+        user.preferences[preference] = value
 
-      return res.json({ success: true, user: resUser })
+        user.save(function (err, u) {
+            if (err) {
+                winston.warn('[API:USERS:UpdatePreferences] Error= ' + err)
+                return res.status(400).json({ success: false, error: err })
+            }
+
+            var resUser = stripUserFields(u)
+
+            return res.json({ success: true, user: resUser })
+        })
     })
-  })
 }
 
 /**
@@ -568,78 +673,78 @@ apiUsers.updatePreferences = function (req, res) {
  }
  */
 apiUsers.deleteUser = function (req, res) {
-  var username = req.params.username
+    var username = req.params.username
 
-  if (_.isUndefined(username) || _.isNull(username)) return res.status(400).json({ error: 'Invalid Request' })
+    if (_.isUndefined(username) || _.isNull(username)) return res.status(400).json({ error: 'Invalid Request' })
 
-  async.waterfall(
-    [
-      function (cb) {
-        UserSchema.getUserByUsername(username, function (err, user) {
-          if (err) return cb(err)
+    async.waterfall(
+        [
+            function (cb) {
+                UserSchema.getUserByUsername(username, function (err, user) {
+                    if (err) return cb(err)
 
-          if (_.isNull(user)) {
-            return cb({ message: 'Invalid User' })
-          }
+                    if (_.isNull(user)) {
+                        return cb({ message: 'Invalid User' })
+                    }
 
-          if (user.username.toLowerCase() === req.user.username) {
-            return cb({ message: 'Cannot remove yourself!' })
-          }
+                    if (user.username.toLowerCase() === req.user.username) {
+                        return cb({ message: 'Cannot remove yourself!' })
+                    }
 
-          if (!permissions.canThis(req.user.role, 'accounts:delete')) return cb({ message: 'Access Denied' })
+                    if (!permissions.canThis(req.user.role, 'accounts:delete')) return cb({ message: 'Access Denied' })
 
-          // TODO: FIX THIS FOR HIERARCHY!!
-          // if (req.user.role.toLowerCase() === 'support' || req.user.role.toLowerCase() === 'user') {
-          //     if (user.role.toLowerCase() === 'mod' || user.role.toLowerCase() === 'admin')
-          //         return cb({message: 'Insufficient permissions'});
-          //
-          // }
+                    // TODO: FIX THIS FOR HIERARCHY!!
+                    // if (req.user.role.toLowerCase() === 'support' || req.user.role.toLowerCase() === 'user') {
+                    //     if (user.role.toLowerCase() === 'mod' || user.role.toLowerCase() === 'admin')
+                    //         return cb({message: 'Insufficient permissions'});
+                    //
+                    // }
 
-          return cb(null, user)
-        })
-      },
-      function (user, cb) {
-        var ticketSchema = require('../../../models/ticket')
-        ticketSchema.getTicketsByRequester(user._id, function (err, tickets) {
-          if (err) return cb(err)
+                    return cb(null, user)
+                })
+            },
+            function (user, cb) {
+                var ticketSchema = require('../../../models/ticket')
+                ticketSchema.getTicketsByRequester(user._id, function (err, tickets) {
+                    if (err) return cb(err)
 
-          var hasTickets = _.size(tickets) > 0
-          return cb(null, hasTickets, user)
-        })
-      },
-      function (hasTickets, user, cb) {
-        var conversationSchema = require('../../../models/chat/conversation')
-        conversationSchema.getConversationsWithLimit(user._id, 10, function (err, conversations) {
-          if (err) return cb(err)
+                    var hasTickets = _.size(tickets) > 0
+                    return cb(null, hasTickets, user)
+                })
+            },
+            function (hasTickets, user, cb) {
+                var conversationSchema = require('../../../models/chat/conversation')
+                conversationSchema.getConversationsWithLimit(user._id, 10, function (err, conversations) {
+                    if (err) return cb(err)
 
-          var hasConversations = _.size(conversations) > 0
-          return cb(null, hasTickets, hasConversations, user)
-        })
-      },
-      function (hasTickets, hasConversations, user, cb) {
-        if (hasTickets || hasConversations) {
-          // Disable if the user has tickets or conversations
-          user.softDelete(function (err) {
-            if (err) return cb(err)
+                    var hasConversations = _.size(conversations) > 0
+                    return cb(null, hasTickets, hasConversations, user)
+                })
+            },
+            function (hasTickets, hasConversations, user, cb) {
+                if (hasTickets || hasConversations) {
+                    // Disable if the user has tickets or conversations
+                    user.softDelete(function (err) {
+                        if (err) return cb(err)
 
-            // Force logout if Logged in
-            return cb(null, true)
-          })
-        } else {
-          user.remove(function (err) {
-            if (err) return cb(err)
+                        // Force logout if Logged in
+                        return cb(null, true)
+                    })
+                } else {
+                    user.remove(function (err) {
+                        if (err) return cb(err)
 
-            return cb(null, false)
-          })
+                        return cb(null, false)
+                    })
+                }
+            }
+        ],
+        function (err, disabled) {
+            if (err) return res.status(400).json({ success: false, error: err.message })
+
+            return res.json({ success: true, disabled: disabled })
         }
-      }
-    ],
-    function (err, disabled) {
-      if (err) return res.status(400).json({ success: false, error: err.message })
-
-      return res.json({ success: true, disabled: disabled })
-    }
-  )
+    )
 }
 
 /**
@@ -663,28 +768,28 @@ apiUsers.deleteUser = function (req, res) {
  }
  */
 apiUsers.enableUser = function (req, res) {
-  var username = req.params.username
-  if (_.isUndefined(username)) return res.status(400).json({ error: 'Invalid Request' })
+    var username = req.params.username
+    if (_.isUndefined(username)) return res.status(400).json({ error: 'Invalid Request' })
 
-  UserSchema.getUserByUsername(username, function (err, user) {
-    if (err) {
-      winston.debug(err)
-      return res.status(400).json({ error: err.message })
-    }
+    UserSchema.getUserByUsername(username, function (err, user) {
+        if (err) {
+            winston.debug(err)
+            return res.status(400).json({ error: err.message })
+        }
 
-    if (_.isUndefined(user) || _.isNull(user)) return res.status(400).json({ error: 'Invalid Request' })
+        if (_.isUndefined(user) || _.isNull(user)) return res.status(400).json({ error: 'Invalid Request' })
 
-    if (!permissions.canThis(req.user.role, 'accounts:delete'))
-      return res.status(401).json({ error: 'Invalid Permissions' })
+        if (!permissions.canThis(req.user.role, 'accounts:delete'))
+            return res.status(401).json({ error: 'Invalid Permissions' })
 
-    user.deleted = false
+        user.deleted = false
 
-    user.save(function (err) {
-      if (err) return res.status(400).json({ error: err.message })
+        user.save(function (err) {
+            if (err) return res.status(400).json({ error: err.message })
 
-      res.json({ success: true })
+            res.json({ success: true })
+        })
     })
-  })
 }
 
 /**
@@ -715,46 +820,46 @@ apiUsers.enableUser = function (req, res) {
  }
  */
 apiUsers.single = function (req, res) {
-  var username = req.params.username
-  if (_.isUndefined(username)) return res.status(400).json({ error: 'Invalid Request.' })
+    var username = req.params.username
+    if (_.isUndefined(username)) return res.status(400).json({ error: 'Invalid Request.' })
 
-  var response = {
-    success: true,
-    groups: []
-  }
-
-  async.waterfall(
-    [
-      function (done) {
-        UserSchema.getUserByUsername(username, function (err, user) {
-          if (err) return done(err)
-
-          if (_.isUndefined(user) || _.isNull(user)) return done('Invalid Request')
-
-          user = stripUserFields(user)
-          response.user = user
-
-          done(null, user)
-        })
-      },
-      function (user, done) {
-        groupSchema.getAllGroupsOfUserNoPopulate(user._id, function (err, grps) {
-          if (err) return done(err)
-
-          response.groups = _.map(grps, function (o) {
-            return o._id
-          })
-
-          done(null, response.groups)
-        })
-      }
-    ],
-    function (err) {
-      if (err) return res.status(400).json({ error: err })
-
-      res.json(response)
+    var response = {
+        success: true,
+        groups: []
     }
-  )
+
+    async.waterfall(
+        [
+            function (done) {
+                UserSchema.getUserByUsername(username, function (err, user) {
+                    if (err) return done(err)
+
+                    if (_.isUndefined(user) || _.isNull(user)) return done('Invalid Request')
+
+                    user = stripUserFields(user)
+                    response.user = user
+
+                    done(null, user)
+                })
+            },
+            function (user, done) {
+                groupSchema.getAllGroupsOfUserNoPopulate(user._id, function (err, grps) {
+                    if (err) return done(err)
+
+                    response.groups = _.map(grps, function (o) {
+                        return o._id
+                    })
+
+                    done(null, response.groups)
+                })
+            }
+        ],
+        function (err) {
+            if (err) return res.status(400).json({ error: err })
+
+            res.json(response)
+        }
+    )
 }
 
 /**
@@ -777,19 +882,19 @@ apiUsers.single = function (req, res) {
  }
  */
 apiUsers.notificationCount = function (req, res) {
-  notificationSchema.getUnreadCount(req.user._id, function (err, count) {
-    if (err) return res.status(400).json({ success: false, error: err.message })
+    notificationSchema.getUnreadCount(req.user._id, function (err, count) {
+        if (err) return res.status(400).json({ success: false, error: err.message })
 
-    return res.json({ success: true, count: count.toString() })
-  })
+        return res.json({ success: true, count: count.toString() })
+    })
 }
 
 apiUsers.getNotifications = function (req, res) {
-  notificationSchema.findAllForUser(req.user._id, function (err, notifications) {
-    if (err) return res.status(500).json({ success: false, error: err.message })
+    notificationSchema.findAllForUser(req.user._id, function (err, notifications) {
+        if (err) return res.status(500).json({ success: false, error: err.message })
 
-    return res.json({ success: true, notifications: notifications })
-  })
+        return res.json({ success: true, notifications: notifications })
+    })
 }
 
 /**
@@ -812,22 +917,22 @@ apiUsers.getNotifications = function (req, res) {
  }
  */
 apiUsers.generateApiKey = function (req, res) {
-  var id = req.params.id
-  if (_.isUndefined(id) || _.isNull(id)) return res.status(400).json({ error: 'Invalid Request' })
-  if (!req.user.role.isAdmin && req.user._id.toString() !== id)
-    return res.status(401).json({ success: false, error: 'Unauthorized' })
+    var id = req.params.id
+    if (_.isUndefined(id) || _.isNull(id)) return res.status(400).json({ error: 'Invalid Request' })
+    if (!req.user.role.isAdmin && req.user._id.toString() !== id)
+        return res.status(401).json({ success: false, error: 'Unauthorized' })
 
-  UserSchema.getUser(id, function (err, user) {
-    if (err || !user) return res.status(400).json({ success: false, error: 'Invalid Request' })
+    UserSchema.getUser(id, function (err, user) {
+        if (err || !user) return res.status(400).json({ success: false, error: 'Invalid Request' })
 
-    // if (user.accessToken) return res.status(400).json({ success: false, error: 'User already has generated token' })
+        // if (user.accessToken) return res.status(400).json({ success: false, error: 'User already has generated token' })
 
-    user.addAccessToken(function (err, token) {
-      if (err) return res.status(400).json({ error: 'Invalid Request' })
+        user.addAccessToken(function (err, token) {
+            if (err) return res.status(400).json({ error: 'Invalid Request' })
 
-      res.json({ token: token })
+            res.json({ token: token })
+        })
     })
-  })
 }
 
 /**
@@ -850,20 +955,20 @@ apiUsers.generateApiKey = function (req, res) {
  }
  */
 apiUsers.removeApiKey = function (req, res) {
-  var id = req.params.id
-  if (_.isUndefined(id) || _.isNull(id)) return res.status(400).json({ error: 'Invalid Request' })
+    var id = req.params.id
+    if (_.isUndefined(id) || _.isNull(id)) return res.status(400).json({ error: 'Invalid Request' })
 
-  if (!req.user.isAdmin && req.user._id.toString() !== id) return res.status(401).json({ success: 'Unauthorized' })
+    if (!req.user.isAdmin && req.user._id.toString() !== id) return res.status(401).json({ success: 'Unauthorized' })
 
-  UserSchema.getUser(id, function (err, user) {
-    if (err) return res.status(400).json({ error: 'Invalid Request', fullError: err })
+    UserSchema.getUser(id, function (err, user) {
+        if (err) return res.status(400).json({ error: 'Invalid Request', fullError: err })
 
-    user.removeAccessToken(function (err) {
-      if (err) return res.status(400).json({ error: 'Invalid Request', fullError: err })
+        user.removeAccessToken(function (err) {
+            if (err) return res.status(400).json({ error: 'Invalid Request', fullError: err })
 
-      return res.json({ success: true })
+            return res.json({ success: true })
+        })
     })
-  })
 }
 
 /**
@@ -886,21 +991,21 @@ apiUsers.removeApiKey = function (req, res) {
  }
  */
 apiUsers.generateL2Auth = function (req, res) {
-  var id = req.params.id
-  if (id.toString() !== req.user._id.toString()) {
-    return res.status(400).json({ success: false, error: 'Invalid Account Owner!' })
-  }
+    var id = req.params.id
+    if (id.toString() !== req.user._id.toString()) {
+        return res.status(400).json({ success: false, error: 'Invalid Account Owner!' })
+    }
 
-  UserSchema.getUser(id, function (err, user) {
-    if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
+    UserSchema.getUser(id, function (err, user) {
+        if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
 
-    user.generateL2Auth(function (err, generatedKey) {
-      if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
+        user.generateL2Auth(function (err, generatedKey) {
+            if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
 
-      req.session.l2auth = 'totp'
-      return res.json({ success: true, generatedKey: generatedKey })
+            req.session.l2auth = 'totp'
+            return res.json({ success: true, generatedKey: generatedKey })
+        })
     })
-  })
 }
 
 /**
@@ -923,21 +1028,21 @@ apiUsers.generateL2Auth = function (req, res) {
  }
  */
 apiUsers.removeL2Auth = function (req, res) {
-  var id = req.params.id
-  if (id.toString() !== req.user._id.toString()) {
-    return res.status(400).json({ success: false, error: 'Invalid Account Owner!' })
-  }
+    var id = req.params.id
+    if (id.toString() !== req.user._id.toString()) {
+        return res.status(400).json({ success: false, error: 'Invalid Account Owner!' })
+    }
 
-  UserSchema.getUser(id, function (err, user) {
-    if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
+    UserSchema.getUser(id, function (err, user) {
+        if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
 
-    user.removeL2Auth(function (err) {
-      if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
+        user.removeL2Auth(function (err) {
+            if (err) return res.status(400).json({ success: false, error: 'Invalid Request' })
 
-      req.session.l2auth = null
-      return res.json({ success: true })
+            req.session.l2auth = null
+            return res.json({ success: true })
+        })
     })
-  })
 }
 
 /**
@@ -962,21 +1067,21 @@ apiUsers.removeL2Auth = function (req, res) {
  */
 
 apiUsers.checkEmail = function (req, res) {
-  var email = req.body.email
+    var email = req.body.email
 
-  if (_.isUndefined(email) || _.isNull(email)) {
-    return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-  }
-
-  UserSchema.getUserByEmail(email, function (err, users) {
-    if (err) return res.status(400).json({ success: false, error: err.message })
-
-    if (!_.isNull(users)) {
-      return res.json({ success: true, exist: true })
+    if (_.isUndefined(email) || _.isNull(email)) {
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
     }
 
-    return res.json({ success: true, exist: false })
-  })
+    UserSchema.getUserByEmail(email, function (err, users) {
+        if (err) return res.status(400).json({ success: false, error: err.message })
+
+        if (!_.isNull(users)) {
+            return res.json({ success: true, exist: true })
+        }
+
+        return res.json({ success: true, exist: false })
+    })
 }
 
 /**
@@ -1000,111 +1105,111 @@ apiUsers.checkEmail = function (req, res) {
  }
  */
 apiUsers.getAssingees = function (req, res) {
-  UserSchema.getAssigneeUsers(function (err, users) {
-    if (err) return res.status(400).json({ error: 'Invalid Request' })
+    UserSchema.getAssigneeUsers(function (err, users) {
+        if (err) return res.status(400).json({ error: 'Invalid Request' })
 
-    var strippedUsers = []
+        var strippedUsers = []
 
-    async.each(
-      users,
-      function (user, cb) {
-        user = stripUserFields(user)
-        strippedUsers.push(user)
+        async.each(
+            users,
+            function (user, cb) {
+                user = stripUserFields(user)
+                strippedUsers.push(user)
 
-        cb()
-      },
-      function () {
-        return res.json({ success: true, users: strippedUsers })
-      }
-    )
-  })
+                cb()
+            },
+            function () {
+                return res.json({ success: true, users: strippedUsers })
+            }
+        )
+    })
 }
 
 apiUsers.uploadProfilePic = function (req, res) {
-  var fs = require('fs')
-  var path = require('path')
-  var Busboy = require('busboy')
-  var busboy = new Busboy({
-    headers: req.headers,
-    limits: {
-      files: 1,
-      fileSize: 1024 * 1024 * 3
-    }
-  })
-
-  var object = {}
-  var error
-
-  if (_.isUndefined(req.params.username)) return res.status(400).json({ error: 'Invalid Username' })
-  object.username = req.params.username
-
-  busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-    if (mimetype.indexOf('image/') === -1) {
-      error = {
-        status: 400,
-        message: 'Invalid file type'
-      }
-
-      return file.resume()
-    }
-
-    var savePath = path.join(__dirname, '../../../../public/uploads/users')
-    if (!fs.existsSync(savePath)) fs.mkdirSync(savePath)
-
-    object.filePath = path.join(savePath, 'aProfile_' + object.username + '.jpg')
-    object.filename = 'aProfile_' + object.username + '.jpg'
-    object.mimetype = mimetype
-
-    file.on('limit', function () {
-      error = {
-        status: 400,
-        message: 'File too large'
-      }
-
-      return file.resume()
+    var fs = require('fs')
+    var path = require('path')
+    var Busboy = require('busboy')
+    var busboy = new Busboy({
+        headers: req.headers,
+        limits: {
+            files: 1,
+            fileSize: 1024 * 1024 * 3
+        }
     })
 
-    file.pipe(fs.createWriteStream(object.filePath))
-  })
+    var object = {}
+    var error
 
-  busboy.on('finish', function () {
-    if (error) return res.status(error.status).send(error.message)
+    if (_.isUndefined(req.params.username)) return res.status(400).json({ error: 'Invalid Username' })
+    object.username = req.params.username
 
-    if (_.isUndefined(object.username) || _.isUndefined(object.filePath) || _.isUndefined(object.filename)) {
-      return res.status(400).send('Invalid Form Data')
-    }
+    busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
+        if (mimetype.indexOf('image/') === -1) {
+            error = {
+                status: 400,
+                message: 'Invalid file type'
+            }
 
-    if (!fs.existsSync(object.filePath)) return res.status(400).send('File failed to save to disk')
+            return file.resume()
+        }
 
-    UserSchema.getUserByUsername(object.username, function (err, user) {
-      if (err) return res.status(400).send(err.message)
+        var savePath = path.join(__dirname, '../../../../public/uploads/users')
+        if (!fs.existsSync(savePath)) fs.mkdirSync(savePath)
 
-      user.image = object.filename
+        object.filePath = path.join(savePath, 'aProfile_' + object.username + '.jpg')
+        object.filename = 'aProfile_' + object.username + '.jpg'
+        object.mimetype = mimetype
 
-      user.save(function (err) {
-        if (err) return res.status(500).send(err.message)
+        file.on('limit', function () {
+            error = {
+                status: 400,
+                message: 'File too large'
+            }
 
-        emitter.emit('trudesk:profileImageUpdate', {
-          userid: user._id,
-          img: user.image
+            return file.resume()
         })
 
-        return res.json({ success: true, user: stripUserFields(user) })
-      })
+        file.pipe(fs.createWriteStream(object.filePath))
     })
-  })
 
-  req.pipe(busboy)
+    busboy.on('finish', function () {
+        if (error) return res.status(error.status).send(error.message)
+
+        if (_.isUndefined(object.username) || _.isUndefined(object.filePath) || _.isUndefined(object.filename)) {
+            return res.status(400).send('Invalid Form Data')
+        }
+
+        if (!fs.existsSync(object.filePath)) return res.status(400).send('File failed to save to disk')
+
+        UserSchema.getUserByUsername(object.username, function (err, user) {
+            if (err) return res.status(400).send(err.message)
+
+            user.image = object.filename
+
+            user.save(function (err) {
+                if (err) return res.status(500).send(err.message)
+
+                emitter.emit('trudesk:profileImageUpdate', {
+                    userid: user._id,
+                    img: user.image
+                })
+
+                return res.json({ success: true, user: stripUserFields(user) })
+            })
+        })
+    })
+
+    req.pipe(busboy)
 }
 
-function stripUserFields (user) {
-  user.password = undefined
-  user.accessToken = undefined
-  user.__v = undefined
-  user.tOTPKey = undefined
-  user.iOSDeviceTokens = undefined
+function stripUserFields(user) {
+    user.password = undefined
+    user.accessToken = undefined
+    user.__v = undefined
+    user.tOTPKey = undefined
+    user.iOSDeviceTokens = undefined
 
-  return user
+    return user
 }
 
 module.exports = apiUsers

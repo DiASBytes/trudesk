@@ -117,6 +117,8 @@ module.exports = function (middleware, router, controllers) {
     // Users
     router.get('/api/v1/users', apiv1, canUser('accounts:view'), apiCtrl.users.getWithLimit)
     router.post('/api/v1/users/create', apiv1, canUser('accounts:create'), apiCtrl.users.create)
+    router.post('/api/v1/users/createFromEmail', apiv1, canUser('accounts:create'), apiCtrl.users.createFromEmail)
+    router.post('/api/v1/users/softDelete', apiv1, canUser('accounts: delete'), apiCtrl.users.softDelete)
     router.get('/api/v1/users/notifications', apiv1, apiCtrl.users.getNotifications)
     router.get('/api/v1/users/notificationCount', apiv1, apiCtrl.users.notificationCount)
     router.get('/api/v1/users/getassignees', apiv1, isAgentOrAdmin, apiCtrl.users.getAssingees)

@@ -549,72 +549,43 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
                 // Create a group for this user
                 var GroupSchema = require('./group')
                 var splittedEmail = savedUser.email.split("@");
-                var group = new GroupSchema({
-                    name: splittedEmail[1],
-                    members: [savedUser._id],
-                    sendMailTo: [savedUser._id],
-                    public: true
-                })
+                var groupName = splittedEmail[1];
 
-                group.save(function (err, group) {
-                    if (err) return callback(err)
+                // Check if group exists
+                GroupSchema.getGroupByName(groupName, function (err, group) {
+                    if (err) return callback('Error getting group');
 
-                    /*
-                    // Send welcome email
-                    var path = require('path')
-                    var mailer = require('../mailer')
-                    var Email = require('email-templates')
-                    var templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
-          
-                    var email = new Email({
-                      views: {
-                        root: templateDir,
-                        options: {
-                          extension: 'handlebars'
-                        }
-                      }
-                    })
-          
-                    var settingSchema = require('./setting')
-                    settingSchema.getSetting('gen:siteurl', function (err, setting) {
-                      if (err) return callback(err)
-          
-                      if (!setting) {
-                        setting = { value: '' }
-                      }
-          
-                      var dataObject = {
-                        user: savedUser,
-                        plainTextPassword: plainTextPass,
-                        baseUrl: setting.value
-                      }
-          
-                      email
-                        .render('public-account-created', dataObject)
-                        .then(function (html) {
-                          var mailOptions = {
-                            to: savedUser.email,
-                            subject: 'Welcome to trudesk! - Here are your account details.',
-                            html: html,
-                            generateTextFromHTML: true
-                          }
-          
-                          mailer.sendMail(mailOptions, function (err) {
-                            if (err) {
-                              winston.warn(err)
-                              return callback(err)
-                            }
-          
-                            return callback(null, { user: savedUser, group: group })
-                          })
+                    if (!group) {
+                        var newGroup = new GroupSchema({
+                            name: groupName,
+                            members: [savedUser._id],
+                            sendMailTo: [],
+                            public: true
                         })
-                        .catch(function (err) {
-                          winston.warn(err)
-                          return callback(err)
-                        })
-                    })
-                    */
-                })
+
+                        newGroup.save(function (err, group) {
+                            if (err) return callback(err)
+
+                            return callback(null, {
+                                user: savedUser,
+                                group: newGroup
+                            });
+                        });
+                    } else {
+                        group.addMember(savedUser._id, function (err, success) {
+                            if (err) return callback('Error saving member to group');
+
+                            group.save(function (err, group) {
+                                if (err) return callback('Error saving group');
+
+                                return callback(null, {
+                                    user: savedUser,
+                                    group: group
+                                });
+                            });
+                        });
+                    }
+                });
             })
         })
     })
