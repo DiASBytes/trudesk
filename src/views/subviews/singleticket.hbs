@@ -441,7 +441,14 @@
                                                     {{calendarDate date}}
                                                 </time>
                                                 <div class="comment-body">
-                                                        <p>{{{comment}}}</p>
+                                                    <p>{{{comment}}}</p>
+                                                </div>
+                                                <div class="issue-attachments">
+                                                    {{#each attachments}}
+                                                        <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
+                                                            <span>{{extname path}}</span>
+                                                        </div>
+                                                    {{/each}}
                                                 </div>
                                             </div>
                                             <div class="comment-actions {{#compare ../data.ticket.status '==' 3}}hide{{/compare}}">

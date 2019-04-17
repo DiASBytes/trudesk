@@ -139,6 +139,8 @@ var notifications = require('../notifications') // Load Push Events
                       // .finally(function () {
                       //   return c()
                       // })
+
+                      util.sendToAllConnectedClients(io, 'ticket:created', ticket)
                     })
                   }
                 )
