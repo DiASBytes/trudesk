@@ -98,6 +98,7 @@ module.exports = function (app, db, callback) {
         app.use('/mobile', express.static(path.join(__dirname, '../../', 'mobile')))
 
         app.use('/assets', express.static(path.join(__dirname, '../../public/uploads/assets')))
+        app.use('/uploads/tickets', express.static(path.join(__dirname, '../../public/uploads/tickets')))
         app.use('/uploads/users', express.static(path.join(__dirname, '../../public/uploads/users')))
         app.use('/uploads', middleware.hasAuth, express.static(path.join(__dirname, '../../public/uploads')))
         app.use(

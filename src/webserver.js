@@ -111,7 +111,6 @@ var port = nconf.get('port') || 8118
             app.set('view engine', 'hbs')
             hbsHelpers.register(hbs.handlebars)
 
-            app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')))
             app.use('/assets', express.static(path.join(__dirname, '../public/uploads/assets')))
 
             app.use(express.static(path.join(__dirname, '../public')))
