@@ -489,7 +489,7 @@ function handleMessages(messages) {
                                                     ticket.addAttachments(ticket._id, attachments, function() {
                                                         ticket.save(function (err, t) {
                                                             if (err) {
-                                                                winston.debug("Comment add failed!");
+                                                                winston.debug("Attachement add failed!");
                                                             } else {
                                                                 callback();
                                                             }
@@ -502,11 +502,42 @@ function handleMessages(messages) {
                                 )
                             } else {
                                 message.ticket.addComment(message.replyUser.id, message.reply, function () {
-                                    message.ticket.save(function (err, t) {
-                                        if (err) {
-                                            winston.debug("Comment add failed!");
-                                        } else {
-                                            winston.debug("Comment add success!");
+                                    message.ticket.save(function (err, ticket) {
+                                        if (err)
+                                            return;
+
+                                        if(message.attachments && message.attachments.length > 0) {
+                                            const attachments = [];
+
+                                            if (!fs.existsSync(`./public/uploads/tickets/${ticket._id}`))
+                                                fs.mkdirSync(`./public/uploads/tickets/${ticket._id}`);
+        
+                                            for(var i = 0; i < message.attachments.length; i++) {
+                                                fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+                                                    if (err) 
+                                                        throw err
+                                                })
+
+                                                attachments.push({
+                                                    owner: message.replyUser.id,
+                                                    name: message.attachments[0].filename,
+                                                    date: new Date(),
+                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`,
+                                                    type: 'image'
+                                                })
+
+                                                if(attachments.length === message.attachments.length) {
+                                                    ticket.addAttachmentsToComment(ticket._id, attachments, function() {
+                                                        ticket.save(function (err, t) {
+                                                            if (err) {
+                                                                winston.debug("Comment add failed!");
+                                                            } else {
+                                                                callback();
+                                                            }
+                                                        });
+                                                    });
+                                                }
+                                            }
                                         }
                                     });
                                 });

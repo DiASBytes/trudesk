@@ -401,6 +401,8 @@ div#accountsTable_wrapper
   .ticket-note,
   .initial-issue
     position: relative
+    .issue-body
+      margin-top: 20px
     .issue-attachments
       display: flex
       padding: 10px 0 15px 0
@@ -411,9 +413,16 @@ div#accountsTable_wrapper
         background: #efefef
         border-radius: 3px
         margin-right: 25px
-        background-size: cover
-        background-repeat: no-repeat
-        background-position: center center
+        // background-size: cover
+        // background-repeat: no-repeat
+        // background-position: center center
+        display: flex
+        align-items: center
+        justify-content: center
+        span
+          color: #545A63
+          font-weight: bold
+          text-transform: uppercase
     .comment-actions,
     .edit-issue,
     .add-attachment

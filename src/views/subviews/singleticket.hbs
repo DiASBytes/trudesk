@@ -290,7 +290,9 @@
                             </div>
                             <div class="issue-attachments" data-ticketid="{{data.ticket._id}}">
                                 {{#each data.ticket.attachments}}
-                                    <div class="issue-attachments__attachement" style="background-image: url({{path}});" ng-click="openAttachment('{{path}}');"></div>
+                                    <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
+                                        <span>{{extname path}}</span>
+                                    </div>
                                     {{!-- {{#canUserOrAdmin ../data.common.loggedInAccount "tickets:removeAttachment"}}
                                         <a href="#" class="remove-attachment" data-attachmentId="{{_id}}"><i class="fa fa-remove"></i></a>
                                     {{/canUserOrAdmin}} --}}
@@ -360,8 +362,11 @@
                                                         {{/is}}
                                                     </div>
                                                     <div class="issue-attachments">
-                                                        <div class="issue-attachments__attachement"></div>
-                                                        <div class="issue-attachments__attachement"></div>
+                                                        {{#each attachments}}
+                                                            <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
+                                                                <span>{{extname path}}</span>
+                                                            </div>
+                                                        {{/each}}
                                                     </div>
                                                 </div>
                                                 <div class="comment-actions {{#compare ../data.ticket.status '==' 3}}hide{{/compare}}">

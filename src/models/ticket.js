@@ -457,6 +457,22 @@ ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
     return callback(null, self)
 }
 
+ticketSchema.methods.addAttachmentsToComment = function (ticketId, attachments, callback) {
+    var self = this
+
+    if (_.isUndefined(ticketId)) return callback('Invalid ticket', null)
+
+    if (_.isUndefined(attachments)) return callback('Invalid attachments', null)
+
+    self.comments[self.comments ? self.comments.length-1 : 0].attachments = [];
+
+    for(var i = 0; i < attachments.length; i++) {
+        self.comments[self.comments ? self.comments.length-1 : 0].attachments.push(attachments[i]);
+    }
+
+    return callback(null, self)
+}
+
 /**
  * Updates a given comment inside the comment array on this ticket
  * @instance
