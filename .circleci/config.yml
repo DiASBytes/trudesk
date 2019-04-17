@@ -39,7 +39,7 @@ jobs:
         command: ssh-keyscan $DODOMAIN >> ~/.ssh/known_hosts
     - run:
         name: Deploy Digital Ocean
-        command: ssh $DOUSER@$DODOMAIN "cd /root/trudesk; git pull; npm install; pm2 restart trudesk;"
+        command: ssh $DOUSER@$DODOMAIN "cd /var/www/trudesk; git pull; npm install; pm2 restart trudesk;"
 
 workflows:
   version: 2.1
