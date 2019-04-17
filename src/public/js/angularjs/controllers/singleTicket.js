@@ -30,7 +30,7 @@ define([
 ], function (angular, _, $, UIkit, socket, nav, md, helpers, EasyMDE) {
   return angular
     .module('trudesk.controllers.singleTicket', ['trudesk.services.session'])
-    .controller('singleTicket', function (SessionService, $window, $rootScope, $scope, $http, $timeout, $q, $log) {
+    .controller('singleTicket', function (SessionService, SettingsService, $window, $rootScope, $scope, $http, $timeout, $q, $log) {
       $scope.loggedInAccount = SessionService.getUser()
 
       var mdeToolbarItems = [
@@ -269,7 +269,7 @@ define([
           onFileUploadResponse: function (xhr) {
             var result = JSON.parse(xhr.responseText)
 
-            var filename = result[this.settings.jsonFieldName]
+            var filename = SettingsService.getSettings().siteUrl.value + result[this.settings.jsonFieldName]
 
             if (result && filename) {
               var newValue
