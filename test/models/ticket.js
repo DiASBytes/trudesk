@@ -71,8 +71,16 @@ describe('ticket.js', function () {
           ticketSchema.getTicketByUid(1000, function (err, ticket) {
             expect(err).to.not.exist
             expect(ticket).to.be.a('object')
+            
+            const data = {
+              status: 3,
+              billingData: {
+                description: 'test',
+                billable: true
+              }
+            }
 
-            ticket.setStatus(m.Types.ObjectId(), 3, function (err, ticket) {
+            ticket.setStatus(m.Types.ObjectId(), data, function (err, ticket) {
               expect(err).to.not.exist
               expect(ticket.status).to.equal(3)
               expect(ticket.closedDate).to.exist
@@ -86,7 +94,7 @@ describe('ticket.js', function () {
             expect(err).to.not.exist
             expect(ticket).to.be.a('object')
 
-            ticket.setStatus(m.Types.ObjectId(), 1, function (err, ticket) {
+            ticket.setStatus(m.Types.ObjectId(), {status: 1}, function (err, ticket) {
               expect(err).to.not.exist
               expect(ticket.status).to.equal(1)
               expect(ticket.closedDate).to.not.exist
