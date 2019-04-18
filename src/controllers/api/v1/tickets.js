@@ -399,6 +399,9 @@ apiTickets.create = function (req, res) {
         owner: req.user._id
     }
 
+    console.log("CREATE TICKET", postData);
+
+
     var TicketSchema = require('../../../models/ticket')
     var ticket = new TicketSchema(postData)
     if (!_.isUndefined(postData.owner)) {
