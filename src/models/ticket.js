@@ -464,10 +464,10 @@ ticketSchema.methods.addAttachmentsToComment = function (ticketId, attachments, 
 
     if (_.isUndefined(attachments)) return callback('Invalid attachments', null)
 
-    self.comments[self.comments ? self.comments.length-1 : 0].attachments = [];
+    self.comments[self.comments ? self.comments.length - 1 : 0].attachments = [];
 
-    for(var i = 0; i < attachments.length; i++) {
-        self.comments[self.comments ? self.comments.length-1 : 0].attachments.push(attachments[i]);
+    for (var i = 0; i < attachments.length; i++) {
+        self.comments[self.comments ? self.comments.length - 1 : 0].attachments.push(attachments[i]);
     }
 
     return callback(null, self)
@@ -712,7 +712,8 @@ ticketSchema.statics.getAllByGroup = function (groupObjectId, callback) {
     self
         .model(COLLECTION)
         .find({
-            group: groupObjectId
+            group: groupObjectId,
+            deleted: false
         })
         .populate('owner assignee')
         .populate('type tags group')
