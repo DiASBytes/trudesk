@@ -63,3 +63,4 @@ public/uploads/assets/upload/
 stats\.json
 
 tmp/*
+.env

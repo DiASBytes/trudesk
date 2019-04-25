@@ -18,7 +18,10 @@ var winston = require('winston')
 var nconf = require('nconf')
 var pkg = require('./package.json')
 var ws = require('./src/webserver')
+var schedule = require('node-schedule')
 // `var memory = require('./src/memory');
+
+var mailReport = require('./src/mailer/mailReport')
 
 var isDocker = process.env.TRUDESK_DOCKER || false
 
@@ -224,7 +227,14 @@ function launchServer (db) {
           })
 
           return next()
-        }
+        },
+        function (next) {
+          schedule.scheduleJob('00 14 * * 4', function(){
+            mailReport.send();
+          });
+
+          return next()
+        },
       ],
       function (err) {
         if (err) throw new Error(err)
