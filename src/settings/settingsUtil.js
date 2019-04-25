@@ -109,6 +109,8 @@ util.getSettings = function (callback) {
     s.allowUserRegistration = parseSetting(settings, 'allowUserRegistration:enable', false)
     s.onCloseTicketNotification = parseSetting(settings, 'onCloseTicketNotification:enable', false)
     s.onCloseTicketEmails = parseSetting(settings, 'onCloseTicketEmails', '')
+    s.onWeeklyReport = parseSetting(settings, 'onWeeklyReport:enable', false)
+    s.onWeeklyReportEmails = parseSetting(settings, 'onWeeklyReportEmails', '')
 
     s.privacyPolicy = parseSetting(settings, 'legal:privacypolicy', '')
     s.privacyPolicy.value = jsStringEscape(s.privacyPolicy.value)

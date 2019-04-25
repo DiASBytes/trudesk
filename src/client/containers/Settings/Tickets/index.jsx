@@ -50,6 +50,7 @@ class TicketsSettings extends React.Component {
 
     this.state = {
       onCloseTicketEmails: '',
+      onWeeklyReportEmails: ''
     }
   }
 
@@ -76,6 +77,12 @@ class TicketsSettings extends React.Component {
     if(prevProps.settings.getIn(['settings', 'onCloseTicketEmails', 'value']) !== this.props.settings.getIn(['settings', 'onCloseTicketEmails', 'value'])) {
       this.setState({
         onCloseTicketEmails: this.getSetting('onCloseTicketEmails')
+      })
+    }
+
+    if(prevProps.settings.getIn(['settings', 'onWeeklyReportEmails', 'value']) !== this.props.settings.getIn(['settings', 'onWeeklyReportEmails', 'value'])) {
+      this.setState({
+        onWeeklyReportEmails: this.getSetting('onWeeklyReportEmails')
       })
     }
   }
@@ -128,6 +135,15 @@ class TicketsSettings extends React.Component {
       name: 'onCloseTicketNotification:enable',
       value: e.target.checked,
       stateName: 'onCloseTicketNotification',
+      noSnackbar: true
+    })
+  }
+
+  onWeeklyReportChanged (e) {
+    this.props.updateSetting({
+      name: 'onWeeklyReport:enable',
+      value: e.target.checked,
+      stateName: 'onWeeklyReport',
       noSnackbar: true
     })
   }
@@ -227,8 +243,6 @@ class TicketsSettings extends React.Component {
       return { text: type.get('name'), value: type.get('_id') }
     })
 
-    console.log('settingsRender', this.state.onCloseTicketEmails);
-
     return (
       <div className={active ? 'active' : 'hide'}>
         <SettingItem
@@ -325,6 +339,48 @@ class TicketsSettings extends React.Component {
                   name: 'onCloseTicketEmails',
                   value: this.state.onCloseTicketEmails,
                   stateName: 'onCloseTicketEmails',
+                  noSnackbar: false
+                })
+              }}
+            />
+          </div>
+        </SettingItem>
+        <SettingItem
+          title={'Weekly report'}
+          subtitle={'Repondents for the weekly report'}
+          component={
+            <EnableSwitch
+              stateName={'onWeeklyReport'}
+              label={'Enabled'}
+              onChange={e => this.onWeeklyReportChanged(e)}
+              checked={this.getSetting('onWeeklyReport')}
+            />
+          }
+        >
+          <div className={'uk-margin-medium-bottom'}>
+            <label>Respondents</label>
+            <input
+              type='text'
+              className={'md-input md-input-width-medium'}
+              name={'weeklyReport'}
+              disabled={!this.getSetting('onWeeklyReport')}
+              value={this.state.onWeeklyReportEmails}
+              onChange={e => this.onInputValueChanged(e, 'onWeeklyReportEmails')}
+            />
+          </div>
+          <div className='uk-clearfix'>
+            <Button
+              text={'Apply'}
+              style={'success'}
+              extraClass={'uk-float-right'}
+              disabled={!this.getSetting('onWeeklyReport')}
+              waves={true}
+              flat={true}
+              onClick={e => {
+                this.props.updateSetting({
+                  name: 'onWeeklyReportEmails',
+                  value: this.state.onWeeklyReportEmails,
+                  stateName: 'onWeeklyReportEmails',
                   noSnackbar: false
                 })
               }}
