@@ -59,7 +59,7 @@ class SettingsContainer extends React.Component {
       () => {
         if (this.page) {
           this.page.scrollTop = 0
-          window.history.pushState({}, null, location.href.replace(/\/[^\/]*$/, '/' + category));
+          window.history.pushState({}, null, location.href.replace(/\/[^/]*$/, '/' + category));
         } 
       }
     )

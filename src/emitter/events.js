@@ -19,7 +19,6 @@ var moment = require('moment')
 var winston = require('winston')
 var emitter = require('../emitter')
 var util = require('../helpers/utils')
-var templateSchema = require('../models/template')
 var ticketSchema = require('../models/ticket')
 var userSchema = require('../models/user')
 var NotificationSchema = require('../models/notification')
@@ -48,9 +47,6 @@ var notifications = require('../notifications') // Load Push Events
           var tpsUsername = _.head(_.filter(tpsSettings, ['name', 'tps:username']))
           var tpsApiKey = _.head(_.filter(tpsSettings, ['name', 'tps:apikey']))
           var baseUrl = _.head(_.filter(tpsSettings, ['name', 'gen:siteurl'])).value
-          var betaEnabled = _.head(_.filter(tpsSettings, ['name', 'beta:email']))
-
-          betaEnabled = !betaEnabled ? false : betaEnabled.value
 
           if (!tpsEnabled || !tpsUsername || !tpsApiKey) {
             tpsEnabled = false
@@ -63,7 +59,6 @@ var notifications = require('../notifications') // Load Push Events
           async.parallel(
             [
               function (c) {
-                var mailer = require('../mailer')
                 var emails = []
                 async.each(
                   ticket.group.sendMailTo,
@@ -78,70 +73,15 @@ var notifications = require('../notifications') // Load Push Events
                   function (err) {
                     if (err) return c(err)
 
+                    var mailJet = require('../mailer/mailJet')
+
                     emails = _.uniq(emails)
 
-                    var email = null
-                    if (betaEnabled) {
-                      email = new Email({
-                        // views: {
-                        //   root: templateDir,
-                        //   options: {
-                        //     extension: 'handlebars'
-                        //   }
-                        // }
-                        render: function (view, locals) {
-                          return new Promise(function (resolve, reject) {
-                            if (!global.Handlebars) return reject(new Error('Could not load global.Handlebars'))
-                            templateSchema.findOne({ name: view }, function (err, template) {
-                              if (err) return reject(err)
-                              if (!template) return reject(new Error('Invalid Template'))
-                              var html = global.Handlebars.compile(template.data['gjs-fullHtml'])(locals)
-                              email.juiceResources(html).then(resolve)
-                            })
-                          })
-                        }
-                      })
-                    } else {
-                      email = new Email({
-                        views: {
-                          root: templateDir,
-                          options: {
-                            extension: 'handlebars'
-                          }
-                        }
-                      })
-                    }
-                    templateSchema.findOne({ name: 'new-ticket' }, function (err, template) {
-                      if (err) return c(err)
-                      if (!template) return c()
-
-                      var context = { base_url: baseUrl, ticket: ticket }
-
-                      email
-                        .render('new-ticket', context)
-                        .then(function (html) {
-                          var subjectParsed = global.HandleBars.compile(template.subject)(context)
-                          var mailOptions = {
-                            to: emails.join(),
-                            subject: subjectParsed,
-                            html: html,
-                            generateTextFromHTML: true
-                          }
-
-                          mailer.sendMail(mailOptions, function (err) {
-                            if (err) winston.warn('[trudesk:events:ticket:created] - ' + err)
-                          })
-                        })
-                        .catch(function (err) {
-                          winston.warn('[trudesk:events:ticket:created] - ' + err)
-                          return c(err)
-                        })
-                      // .finally(function () {
-                      //   return c()
-                      // })
-
-                      util.sendToAllConnectedClients(io, 'ticket:created', ticket)
-                    })
+                    mailJet.sendTicketCreated(ticket, emails).then(function(data) {
+                      console.log('data', data);
+                    }).catch((err) => {
+                      console.log('err', err);
+                    });
                   }
                 )
               },
