@@ -7,20 +7,20 @@ executors:
     working_directory: ~/trudesk
 
 commands:
-  yarninstall:
+  npminstall:
     steps:
     - restore_cache:
-        name: Restore Yarn Package Cache
+        name: Restore NPM Package Cache
         keys:
-        - yarn-packages-{{ checksum "yarn.lock" }}
+        - npm-packages-{{ checksum "package-lock.json" }}
     - run:
         name: Install Dependencies
-        command: yarn install --frozen-lockfile
+        command: npm install
     - save_cache:
-        name: Save Yarn Package Cache
-        key: yarn-packages-{{ checksum "yarn.lock" }}
+        name: Save NPM Package Cache
+        key: npm-packages-{{ checksum "package-lock.json" }}
         paths:
-        - ~/.cache/yarn
+        - ~/.cache/npm
 
 jobs:
   build_production:
@@ -30,10 +30,10 @@ jobs:
     working_directory: ~/trudesk
     steps:
     - checkout
-    - yarninstall
+    - npminstall
     - run:
         name: Run Tests
-        command: yarn run test
+        command: npm run test
     - run:
         name: Add to know hosts
         command: ssh-keyscan $DODOMAIN >> ~/.ssh/known_hosts
