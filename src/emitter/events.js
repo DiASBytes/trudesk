@@ -382,7 +382,6 @@ var notifications = require('../notifications') // Load Push Events
           },
           // Send email to subscribed users
           function (c) {
-            var mailer = require('../mailer')
             var emails = []
             async.each(
               ticket.subscribers,
@@ -404,14 +403,7 @@ var notifications = require('../notifications') // Load Push Events
                   return c()
                 }
 
-                var email = new Email({
-                  views: {
-                    root: templateDir,
-                    options: {
-                      extension: 'handlebars'
-                    }
-                  }
-                })
+                var mailJet = require('../mailer/mailJet')
 
                 ticket.populate('comments.owner', function (err, t) {
                   if (err) winston.warn(err)
@@ -419,35 +411,11 @@ var notifications = require('../notifications') // Load Push Events
 
                   let comments = _.sortBy(t.comments, function(o) { return moment(o.date); }).reverse()
 
-                  let ticket = t;
-                  ticket.comments = comments;
+                  // ticket.comments = comments.map(function(comment) {
+                  //   return { ...comment, date = moment(comment.date).format('MMMM Do YYYY, HH:mm:ss') };
+                  // });
 
-                  email
-                    .render('ticket-comment-added', {
-                      ticket: ticket,
-                      comment: comment
-                    })
-                    .then(function (html) {
-                      var mailOptions = {
-                        to: emails.join(),
-                        subject: 'Updated: Ticket #' + ticket.uid + '-' + ticket.subject,
-                        html: html,
-                        generateTextFromHTML: true
-                      }
-
-                      mailer.sendMail(mailOptions, function (err) {
-                        if (err) {
-                          winston.warn('[trudesk:events:sendSubscriberEmail] - ' + err)
-                        }
-                      })
-                    })
-                    .catch(function (err) {
-                      winston.warn('[trudesk:events:sendSubscriberEmail] - ' + err)
-                      return c(err)
-                    })
-                    .finally(function () {
-                      return c()
-                    })
+                  mailJet.sendCommentAdded(t, comments, emails)
                 })
               }
             )
