@@ -24,7 +24,7 @@ mailReport.send = function() {
                 }
 
                 axios({
-                    url:`${APPLICATION_URL}/api/v1/reports/generate/tickets_by_status`,
+                    url:`${APPLICATION_URL}api/v1/reports/generate/tickets_by_status`,
                     headers: { 
                         'Content-Type': 'application/json',
                         'accessToken': `${TRUDESK_ACCESS_TOKEN}`

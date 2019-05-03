@@ -62,6 +62,7 @@ class TicketsSettings extends React.Component {
       itemsOnPage: 16
     })
     $tagPagination.on('select.uk.pagination', this.getTicketTags)
+    helpers.UI.inputs()
   }
 
   componentDidUpdate (prevProps) {
@@ -85,6 +86,8 @@ class TicketsSettings extends React.Component {
         onWeeklyReportEmails: this.getSetting('onWeeklyReportEmails')
       })
     }
+
+    helpers.UI.reRenderInputs()
   }
 
   getSetting (name) {
