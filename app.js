@@ -229,7 +229,7 @@ function launchServer (db) {
           return next()
         },
         function (next) {
-          schedule.scheduleJob('30 10 * * 5', function(){
+          schedule.scheduleJob('00 18 * * 5', function(){
             mailReport.send();
           });
 
