@@ -921,7 +921,7 @@ apiTickets.postComment = function (req, res) {
         var Comment = {
             owner: owner,
             date: new Date(),
-            comment: marked(comment)
+            comment: marked(comment).replace(/<img src/g, '<img style="max-width:650px" src')
         }
 
         t.updated = Date.now()
