@@ -389,6 +389,11 @@ var notifications = require('../notifications') // Load Push Events
                             async.each(
                                 ticket.subscribers,
                                 function (member, cb) {
+                                    // Send to owner
+                                    if (ticket.owner.id !== comment.owner) {
+                                        emails.push(ticket.owner.email);
+                                    }
+
                                     if (_.isUndefined(member) || _.isUndefined(member.email)) return cb()
                                     if (member._id.toString() === comment.owner.toString()) return cb()
                                     if (member.deleted) return cb()
