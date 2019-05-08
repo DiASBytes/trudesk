@@ -394,7 +394,7 @@ apiTickets.create = function (req, res) {
     });
 
     busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-        var saveTo = path.join('.', 'tmp', filename);
+        var saveTo = `tmp/${filename}`;
         file.pipe(fs.createWriteStream(saveTo));
         postData.file = saveTo;
     })
