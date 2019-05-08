@@ -12,6 +12,7 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
+require('dotenv').config()
 var nconf = require('nconf')
 var mongoose = require('mongoose')
 var winston = require('winston')
