@@ -22,7 +22,7 @@ var moment = require('moment')
 var settingsSchema = require('../../../models/setting')
 
 var apiReports = {
-  generate: {}
+    generate: {}
 }
 
 /**
@@ -56,32 +56,32 @@ var apiReports = {
  }
  */
 apiReports.generate.ticketsByGroup = function (req, res) {
-  var postData = req.body
-  if (!postData || !postData.startDate || !postData.endDate)
-    return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    var postData = req.body
+    if (!postData || !postData.startDate || !postData.endDate)
+        return res.status(400).json({ success: false, error: 'Invalid Post Data' })
 
-  ticketSchema.getTicketsWithObject(
-    postData.groups,
-    {
-      limit: -1,
-      page: 0,
-      filter: {
-        date: {
-          start: postData.startDate,
-          end: postData.endDate
+    ticketSchema.getTicketsWithObject(
+        postData.groups,
+        {
+            limit: -1,
+            page: 0,
+            filter: {
+                date: {
+                    start: postData.startDate,
+                    end: postData.endDate
+                }
+            }
+        },
+        function (err, tickets) {
+            if (err) return res.status(400).json({ success: false, error: err })
+
+            var input = processReportData(tickets)
+
+            tickets = null
+
+            return processResponse(res, input)
         }
-      }
-    },
-    function (err, tickets) {
-      if (err) return res.status(400).json({ success: false, error: err })
-
-      var input = processReportData(tickets)
-
-      tickets = null
-
-      return processResponse(res, input)
-    }
-  )
+    )
 }
 
 /**
@@ -116,48 +116,48 @@ apiReports.generate.ticketsByGroup = function (req, res) {
  }
  */
 apiReports.generate.ticketsByPriority = function (req, res) {
-  var postData = req.body
+    var postData = req.body
 
-  async.waterfall(
-    [
-      function (done) {
-        if (_.includes(postData.groups, '-1')) {
-          groupSchema.getAllGroupsNoPopulate(function (err, grps) {
-            if (err) return done(err)
-            return done(null, grps)
-          })
-        } else {
-          return done(null, postData.groups)
-        }
-      },
-      function (grps, done) {
-        ticketSchema.getTicketsWithObject(
-          grps,
-          {
-            limit: -1,
-            page: 0,
-            filter: {
-              priority: postData.priorities
+    async.waterfall(
+        [
+            function (done) {
+                if (_.includes(postData.groups, '-1')) {
+                    groupSchema.getAllGroupsNoPopulate(function (err, grps) {
+                        if (err) return done(err)
+                        return done(null, grps)
+                    })
+                } else {
+                    return done(null, postData.groups)
+                }
+            },
+            function (grps, done) {
+                ticketSchema.getTicketsWithObject(
+                    grps,
+                    {
+                        limit: -1,
+                        page: 0,
+                        filter: {
+                            priority: postData.priorities
+                        }
+                    },
+                    function (err, tickets) {
+                        if (err) return done(err)
+
+                        var input = processReportData(tickets)
+
+                        tickets = null
+
+                        return done(null, input)
+                    }
+                )
             }
-          },
-          function (err, tickets) {
-            if (err) return done(err)
+        ],
+        function (err, input) {
+            if (err) return res.status(400).json({ success: false, error: err })
 
-            var input = processReportData(tickets)
-
-            tickets = null
-
-            return done(null, input)
-          }
-        )
-      }
-    ],
-    function (err, input) {
-      if (err) return res.status(400).json({ success: false, error: err })
-
-      return processResponse(res, input)
-    }
-  )
+            return processResponse(res, input)
+        }
+    )
 }
 
 /**
@@ -192,53 +192,115 @@ apiReports.generate.ticketsByPriority = function (req, res) {
  }
  */
 apiReports.generate.ticketsByStatus = function (req, res) {
-  var postData = req.body
+    var postData = req.body
 
-  async.waterfall(
-    [
-      function (done) {
-        if (_.includes(postData.groups, '-1')) {
-          groupSchema.getAllGroupsNoPopulate(function (err, grps) {
-            if (err) return done(err)
+    async.waterfall(
+        [
+            function (done) {
+                if (_.includes(postData.groups, '-1')) {
+                    groupSchema.getAllGroupsNoPopulate(function (err, grps) {
+                        if (err) return done(err)
 
-            return done(null, grps)
-          })
-        } else {
-          return done(null, postData.groups)
-        }
-      },
-      function (grps, done) {
-        ticketSchema.getTicketsWithObject(
-          grps,
-          {
-            limit: -1,
-            page: 0,
-            status: postData.status,
-            filter: {
-              date: {
-                start: postData.startDate,
-                end: postData.endDate
-              }
+                        return done(null, grps)
+                    })
+                } else {
+                    return done(null, postData.groups)
+                }
+            },
+            function (grps, done) {
+                ticketSchema.getTicketsWithObject(
+                    grps,
+                    {
+                        limit: -1,
+                        page: 0,
+                        status: postData.status,
+                        filter: {
+                            date: {
+                                start: postData.startDate,
+                                end: postData.endDate
+                            }
+                        }
+                    },
+                    function (err, tickets) {
+                        if (err) return done(err)
+
+                        var input = processReportData(tickets)
+
+                        tickets = null
+
+                        return done(null, input)
+                    }
+                )
             }
-          },
-          function (err, tickets) {
-            if (err) return done(err)
+        ],
+        function (err, input) {
+            if (err) return res.status(400).json({ success: false, error: err })
 
-            var input = processReportData(tickets)
+            return processResponse(res, input)
+        }
+    )
+}
 
-            tickets = null
+/**
+ * Tickets for weekly report (all statusses except closed older than 1 week)
+ */
+apiReports.generate.ticketsWeeklyReport = function (req, res) {
+    var postData = req.body
 
-            return done(null, input)
-          }
-        )
-      }
-    ],
-    function (err, input) {
-      if (err) return res.status(400).json({ success: false, error: err })
+    async.waterfall(
+        [
+            function (done) {
+                if (_.includes(postData.groups, '-1')) {
+                    groupSchema.getAllGroupsNoPopulate(function (err, grps) {
+                        if (err) return done(err)
 
-      return processResponse(res, input)
-    }
-  )
+                        return done(null, grps)
+                    })
+                } else {
+                    return done(null, postData.groups)
+                }
+            },
+            function (grps, done) {
+                ticketSchema.getTicketsWithObject(
+                    grps,
+                    {
+                        limit: -1,
+                        page: 0,
+                        status: postData.status,
+                        filter: {
+                            date: {
+                                start: postData.startDate,
+                                end: postData.endDate
+                            }
+                        }
+                    },
+                    function (err, tickets) {
+                        if (err) return done(err)
+
+                        const oneWeekAgo = moment().subtract(1, "week");
+                        const data = tickets.filter(ticket => {
+                            if (ticket.status === 3 && moment(ticket.closedDate).isBefore(oneWeekAgo)) {
+                                return false;
+                            }
+
+                            return true;
+                        });
+
+                        var input = processReportData(data)
+
+                        tickets = null
+
+                        return done(null, input)
+                    }
+                )
+            }
+        ],
+        function (err, input) {
+            if (err) return res.status(400).json({ success: false, error: err })
+
+            return processResponse(res, input)
+        }
+    )
 }
 
 /**
@@ -273,53 +335,53 @@ apiReports.generate.ticketsByStatus = function (req, res) {
  }
  */
 apiReports.generate.ticketsByTags = function (req, res) {
-  var postData = req.body
+    var postData = req.body
 
-  async.waterfall(
-    [
-      function (done) {
-        if (_.includes(postData.groups, '-1')) {
-          groupSchema.getAllGroupsNoPopulate(function (err, grps) {
-            if (err) return done(err)
+    async.waterfall(
+        [
+            function (done) {
+                if (_.includes(postData.groups, '-1')) {
+                    groupSchema.getAllGroupsNoPopulate(function (err, grps) {
+                        if (err) return done(err)
 
-            return done(null, grps)
-          })
-        } else {
-          return done(null, postData.groups)
-        }
-      },
-      function (grps, done) {
-        ticketSchema.getTicketsWithObject(
-          grps,
-          {
-            limit: -1,
-            page: 0,
-            filter: {
-              date: {
-                start: postData.startDate,
-                end: postData.endDate
-              },
-              tags: postData.tags
+                        return done(null, grps)
+                    })
+                } else {
+                    return done(null, postData.groups)
+                }
+            },
+            function (grps, done) {
+                ticketSchema.getTicketsWithObject(
+                    grps,
+                    {
+                        limit: -1,
+                        page: 0,
+                        filter: {
+                            date: {
+                                start: postData.startDate,
+                                end: postData.endDate
+                            },
+                            tags: postData.tags
+                        }
+                    },
+                    function (err, tickets) {
+                        if (err) return done(err)
+
+                        var input = processReportData(tickets)
+
+                        tickets = null
+
+                        return done(null, input)
+                    }
+                )
             }
-          },
-          function (err, tickets) {
-            if (err) return done(err)
+        ],
+        function (err, input) {
+            if (err) return res.status(400).json({ success: false, error: err })
 
-            var input = processReportData(tickets)
-
-            tickets = null
-
-            return done(null, input)
-          }
-        )
-      }
-    ],
-    function (err, input) {
-      if (err) return res.status(400).json({ success: false, error: err })
-
-      return processResponse(res, input)
-    }
-  )
+            return processResponse(res, input)
+        }
+    )
 }
 
 /**
@@ -354,52 +416,52 @@ apiReports.generate.ticketsByTags = function (req, res) {
  }
  */
 apiReports.generate.ticketsByType = function (req, res) {
-  var postData = req.body
-  async.waterfall(
-    [
-      function (done) {
-        if (_.includes(postData.groups, '-1')) {
-          groupSchema.getAllGroupsNoPopulate(function (err, grps) {
-            if (err) return done(err)
+    var postData = req.body
+    async.waterfall(
+        [
+            function (done) {
+                if (_.includes(postData.groups, '-1')) {
+                    groupSchema.getAllGroupsNoPopulate(function (err, grps) {
+                        if (err) return done(err)
 
-            return done(null, grps)
-          })
-        } else {
-          return done(null, postData.groups)
-        }
-      },
-      function (grps, done) {
-        ticketSchema.getTicketsWithObject(
-          grps,
-          {
-            limit: -1,
-            page: 0,
-            filter: {
-              date: {
-                start: postData.startDate,
-                end: postData.endDate
-              },
-              types: postData.types
+                        return done(null, grps)
+                    })
+                } else {
+                    return done(null, postData.groups)
+                }
+            },
+            function (grps, done) {
+                ticketSchema.getTicketsWithObject(
+                    grps,
+                    {
+                        limit: -1,
+                        page: 0,
+                        filter: {
+                            date: {
+                                start: postData.startDate,
+                                end: postData.endDate
+                            },
+                            types: postData.types
+                        }
+                    },
+                    function (err, tickets) {
+                        if (err) return done(err)
+
+                        var input = processReportData(tickets)
+
+                        tickets = null
+
+                        return done(null, input)
+                    }
+                )
             }
-          },
-          function (err, tickets) {
-            if (err) return done(err)
+        ],
+        function (err, input) {
+            if (err) return res.status(400).json({ success: false, error: err })
 
-            var input = processReportData(tickets)
-
-            tickets = null
-
-            return done(null, input)
-          }
-        )
-      }
-    ],
-    function (err, input) {
-      if (err) return res.status(400).json({ success: false, error: err })
-
-      return processResponse(res, input)
-    }
-  )
+            return processResponse(res, input)
+        }
+    )
 }
 
 /**
@@ -434,112 +496,112 @@ apiReports.generate.ticketsByType = function (req, res) {
  }
  */
 apiReports.generate.ticketsByUser = function (req, res) {
-  var postData = req.body
-  async.waterfall(
-    [
-      function (done) {
-        if (_.includes(postData.groups, '-1')) {
-          groupSchema.getAllGroupsNoPopulate(function (err, grps) {
-            if (err) return done(err)
+    var postData = req.body
+    async.waterfall(
+        [
+            function (done) {
+                if (_.includes(postData.groups, '-1')) {
+                    groupSchema.getAllGroupsNoPopulate(function (err, grps) {
+                        if (err) return done(err)
 
-            return done(null, grps)
-          })
-        } else {
-          return done(null, postData.groups)
-        }
-      },
-      function (grps, done) {
-        ticketSchema.getTicketsWithObject(
-          grps,
-          {
-            limit: -1,
-            page: 0,
-            filter: {
-              date: {
-                start: postData.startDate,
-                end: postData.endDate
-              },
-              owner: postData.users
+                        return done(null, grps)
+                    })
+                } else {
+                    return done(null, postData.groups)
+                }
+            },
+            function (grps, done) {
+                ticketSchema.getTicketsWithObject(
+                    grps,
+                    {
+                        limit: -1,
+                        page: 0,
+                        filter: {
+                            date: {
+                                start: postData.startDate,
+                                end: postData.endDate
+                            },
+                            owner: postData.users
+                        }
+                    },
+                    function (err, tickets) {
+                        if (err) return done(err)
+
+                        var input = processReportData(tickets)
+
+                        tickets = null
+
+                        return done(null, input)
+                    }
+                )
             }
-          },
-          function (err, tickets) {
-            if (err) return done(err)
+        ],
+        function (err, input) {
+            if (err) return res.status(400).json({ success: false, error: err })
 
-            var input = processReportData(tickets)
-
-            tickets = null
-
-            return done(null, input)
-          }
-        )
-      }
-    ],
-    function (err, input) {
-      if (err) return res.status(400).json({ success: false, error: err })
-
-      return processResponse(res, input)
-    }
-  )
+            return processResponse(res, input)
+        }
+    )
 }
 
-function processReportData (tickets) {
-  var input = []
-  for (var i = 0; i < tickets.length; i++) {
-    var ticket = tickets[i]
+function processReportData(tickets) {
+    var input = []
+    for (var i = 0; i < tickets.length; i++) {
+        var ticket = tickets[i]
 
-    var t = []
-    t.push(ticket.uid)
-    t.push(ticket.type.name)
-    t.push(ticket.priority.name)
-    t.push(ticket.statusFormatted)
-    t.push(moment(ticket.date).format('MMM DD, YY HH:mm:ss'))
-    t.push(ticket.subject)
-    t.push(ticket.owner.fullname)
-    t.push(ticket.group.name)
-    if (ticket.assignee) {
-      t.push(ticket.assignee.fullname)
-    } else {
-      t.push('')
+        var t = []
+        t.push(ticket.uid)
+        t.push(ticket.type.name)
+        t.push(ticket.priority.name)
+        t.push(ticket.statusFormatted)
+        t.push(moment(ticket.date).format('MMM DD, YY HH:mm:ss'))
+        t.push(ticket.subject)
+        t.push(ticket.owner.fullname)
+        t.push(ticket.group.name)
+        if (ticket.assignee) {
+            t.push(ticket.assignee.fullname)
+        } else {
+            t.push('')
+        }
+
+        var tags = ''
+        for (var k = 0; k < ticket.tags.length; k++) {
+            if (k === ticket.tags.length - 1) {
+                tags += ticket.tags[k].name
+            } else {
+                tags += ticket.tags[k].name + ';'
+            }
+        }
+
+        t.push(tags)
+
+        input.push(t)
     }
 
-    var tags = ''
-    for (var k = 0; k < ticket.tags.length; k++) {
-      if (k === ticket.tags.length - 1) {
-        tags += ticket.tags[k].name
-      } else {
-        tags += ticket.tags[k].name + ';'
-      }
-    }
-
-    t.push(tags)
-
-    input.push(t)
-  }
-
-  return input
+    return input
 }
 
-function processResponse (res, input) {
-  var headers = {
-    uid: 'uid',
-    type: 'type',
-    priority: 'priority',
-    status: 'status',
-    created: 'created',
-    subject: 'subject',
-    requester: 'requester',
-    group: 'group',
-    assignee: 'assignee',
-    tags: 'tags'
-  }
+function processResponse(res, input) {
+    var headers = {
+        uid: 'uid',
+        type: 'type',
+        priority: 'priority',
+        status: 'status',
+        created: 'created',
+        subject: 'subject',
+        requester: 'requester',
+        group: 'group',
+        assignee: 'assignee',
+        tags: 'tags'
+    }
 
-  csv.stringify(input, { header: true, columns: headers }, function (err, output) {
-    if (err) return res.status(400).json({ success: false, error: err })
+    csv.stringify(input, { header: true, columns: headers }, function (err, output) {
+        if (err) return res.status(400).json({ success: false, error: err })
 
-    res.setHeader('Content-disposition', 'attachment; filename=report_output.csv')
-    res.set('Content-Type', 'text/csv')
-    res.send(output)
-  })
+        res.setHeader('Content-disposition', 'attachment; filename=report_output.csv')
+        res.set('Content-Type', 'text/csv')
+        res.send(output)
+    })
 }
 
 module.exports = apiReports

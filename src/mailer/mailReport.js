@@ -11,12 +11,12 @@ var settings = require('../models/setting')
 var { TRUDESK_ACCESS_TOKEN, APPLICATION_URL } = process.env;
 var mailReport = {}
 
-mailReport.send = function() {
+mailReport.send = function () {
     settings.getSettingByName('onWeeklyReport:enable', function (err, setting) {
         if (err) {
             return console.log(err)
         }
-        
+
         if (setting && setting.value === true) {
             settings.getSettingByName('onWeeklyReportEmails', function (err, emails) {
                 if (err) {
@@ -24,8 +24,8 @@ mailReport.send = function() {
                 }
 
                 axios({
-                    url:`${APPLICATION_URL}api/v1/reports/generate/tickets_by_status`,
-                    headers: { 
+                    url: `${APPLICATION_URL}api/v1/reports/generate/tickets_weekly_report`,
+                    headers: {
                         'Content-Type': 'application/json',
                         'accessToken': `${TRUDESK_ACCESS_TOKEN}`
                     },
@@ -34,50 +34,50 @@ mailReport.send = function() {
                         startDate: '01-01-2019',
                         endDate: moment().format('MM-DD-YYYY'),
                         groups: ['-1'],
-                        status: ['0', '1', '2']
+                        status: ['0', '1', '2', '3']
                     }
                 })
-                .then(function (response) {
-                    if(response && response.data) {
-                        var email = new Email({
-                            views: {
-                                root: templateDir,
-                                options: {
-                                    extension: 'handlebars'
-                                }
-                            }
-                        })
-            
-                        email
-                            .render('weekly-report')
-                            .then(function (html) {
-                                var mailOptions = {
-                                    to: emails.value,
-                                    subject: 'Weekly report',
-                                    html: html,
-                                    generateTextFromHTML: true,
-                                    attachments: [
-                                        {
-                                            filename: 'report.csv',
-                                            content: response.data
-                                        }
-                                    ]
-                                }
-            
-                                mailer.sendMail(mailOptions, function (err) {
-                                    if (err) {
-                                        console.log('err', err);
+                    .then(function (response) {
+                        if (response && response.data) {
+                            var email = new Email({
+                                views: {
+                                    root: templateDir,
+                                    options: {
+                                        extension: 'handlebars'
                                     }
-                                })
+                                }
                             })
-                            .catch(function (err) {
-                                console.log('err', err);
-                            });
-                    }
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
+
+                            email
+                                .render('weekly-report')
+                                .then(function (html) {
+                                    var mailOptions = {
+                                        to: emails.value,
+                                        subject: 'Weekly report',
+                                        html: html,
+                                        generateTextFromHTML: true,
+                                        attachments: [
+                                            {
+                                                filename: 'report.csv',
+                                                content: response.data
+                                            }
+                                        ]
+                                    }
+
+                                    mailer.sendMail(mailOptions, function (err) {
+                                        if (err) {
+                                            console.log('err', err);
+                                        }
+                                    })
+                                })
+                                .catch(function (err) {
+                                    console.log('err', err);
+                                });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             })
         }
     })

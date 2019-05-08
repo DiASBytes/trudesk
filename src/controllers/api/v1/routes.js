@@ -153,6 +153,7 @@ module.exports = function (middleware, router, controllers) {
     var genBaseUrl = '/api/v1/reports/generate/'
     router.post(genBaseUrl + 'tickets_by_group', apiv1, canUser('reports:create'), reportsGenCtrl.ticketsByGroup)
     router.post(genBaseUrl + 'tickets_by_status', apiv1, canUser('reports:create'), reportsGenCtrl.ticketsByStatus)
+    router.post(genBaseUrl + 'tickets_weekly_report', apiv1, canUser('reports:create'), reportsGenCtrl.ticketsWeeklyReport)
     router.post(genBaseUrl + 'tickets_by_priority', apiv1, canUser('reports:create'), reportsGenCtrl.ticketsByPriority)
     router.post(genBaseUrl + 'tickets_by_tags', apiv1, canUser('reports:create'), reportsGenCtrl.ticketsByTags)
     router.post(genBaseUrl + 'tickets_by_type', apiv1, canUser('reports:create'), reportsGenCtrl.ticketsByType)
