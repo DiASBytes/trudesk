@@ -341,6 +341,93 @@ apiTickets.search = function (req, res) {
     )
 }
 
+const createTicket = function (postData, userId, cb) {
+    var response = {}
+    response.status = 200;
+    response.success = true;
+
+    if (!_.isObject(postData) || !postData.subject || !postData.issue) {
+        response.error = 'Invalid post data';
+        return cb(response);
+    }
+
+    if (_.isUndefined(postData.tags) || _.isNull(postData.tags)) {
+        postData.tags = []
+    } else if (!_.isArray(postData.tags)) {
+        postData.tags = [postData.tags]
+    }
+
+    var HistoryItem = {
+        action: 'ticket:created',
+        description: 'Ticket was created.',
+        owner: userId
+    }
+
+    var TicketSchema = require('../../../models/ticket')
+    var ticket = new TicketSchema(postData)
+    if (!_.isUndefined(postData.owner)) {
+        ticket.owner = postData.owner
+    } else {
+        ticket.owner = userId
+    }
+
+    var marked = require('marked')
+    var tIssue = ticket.issue
+    tIssue = tIssue.replace(/(\r\n|\n\r|\r|\n)/g, '<br>')
+    ticket.issue = marked(tIssue)
+    ticket.history = [HistoryItem]
+    ticket.subscribers = [userId]
+
+    ticket.save(function (err, t) {
+        if (err) {
+            response.success = false
+            response.status = 500
+            response.error = err
+            winston.debug(response)
+            return cb(response);
+        }
+
+        response.ticket = t
+
+        if (postData.file) {
+            const attachments = [];
+
+            const publicPath = path.join(__dirname, '../../../../public/');
+
+            if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
+                fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
+
+            fs.rename(postData.file, `${publicPath}uploads/tickets/${ticket._id}/${postData.filename}`, function (err) {
+                if (err)
+                    throw err
+            })
+
+            attachments.push({
+                owner: postData.owner,
+                name: postData.filename,
+                date: new Date(),
+                path: `/uploads/tickets/${ticket._id}/${postData.filename}`,
+                type: 'image'
+            })
+
+            if (attachments.length) {
+                ticket.addAttachments(ticket._id, attachments, function () {
+                    ticket.save(function (err, t) {
+                        if (err) {
+                            winston.debug("Attachement add failed!");
+                        } else {
+                            return cb(response);
+                        }
+                    });
+                });
+            }
+        } else {
+
+            return cb(response);
+        }
+    });
+};
+
 /**
  * @api {post} /api/v1/tickets/create Create Ticket
  * @apiName createTicket
@@ -378,16 +465,33 @@ apiTickets.search = function (req, res) {
             "error": "Invalid Post Data"
         }
  */
-
 apiTickets.create = function (req, res) {
-    var response = {}
-    response.success = true
+    var postData = req.body;
 
+    var socketId = _.isUndefined(postData.socketId) ? '' : postData.socketId
+
+    createTicket(postData, req.user._id, function (response) {
+        if (!response.success) {
+            res.status(response.status).json(response);
+        }
+        emitter.emit('ticket:created', {
+            hostname: req.headers.host,
+            socketId: socketId,
+            ticket: response.ticket
+        });
+
+        res.status(response.status).json(response);
+    });
+}
+
+apiTickets.createWithFile = function (req, res) {
     var postData = {};
     var Busboy = require('busboy')
     var busboy = new Busboy({
         headers: req.headers
     })
+
+    var socketId = _.isUndefined(postData.socketId) ? '' : postData.socketId
 
     busboy.on('field', function (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
         postData[fieldname] = val;
@@ -400,89 +504,14 @@ apiTickets.create = function (req, res) {
     })
 
     busboy.on('finish', function () {
-        if (!_.isObject(postData) || !postData.subject || !postData.issue)
-            return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-
-        var socketId = _.isUndefined(postData.socketId) ? '' : postData.socketId
-
-        if (_.isUndefined(postData.tags) || _.isNull(postData.tags)) {
-            postData.tags = []
-        } else if (!_.isArray(postData.tags)) {
-            postData.tags = [postData.tags]
-        }
-
-        var HistoryItem = {
-            action: 'ticket:created',
-            description: 'Ticket was created.',
-            owner: req.user._id
-        }
-
-        var TicketSchema = require('../../../models/ticket')
-        var ticket = new TicketSchema(postData)
-        if (!_.isUndefined(postData.owner)) {
-            ticket.owner = postData.owner
-        } else {
-            ticket.owner = req.user._id
-        }
-
-        var marked = require('marked')
-        var tIssue = ticket.issue
-        tIssue = tIssue.replace(/(\r\n|\n\r|\r|\n)/g, '<br>')
-        ticket.issue = marked(tIssue)
-        ticket.history = [HistoryItem]
-        ticket.subscribers = [req.user._id]
-
-        ticket.save(function (err, t) {
-            if (err) {
-                response.success = false
-                response.error = err
-                winston.debug(response)
-                return res.status(400).json(response)
-            }
-
+        createTicket(postData, req.user._id, function (response) {
             emitter.emit('ticket:created', {
                 hostname: req.headers.host,
                 socketId: socketId,
-                ticket: t
+                ticket: response.ticket
             })
 
-            response.ticket = t
-
-            if (postData.file) {
-                const attachments = [];
-
-                const publicPath = path.join(__dirname, '../../../../public/');
-
-                if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
-                    fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
-
-                fs.rename(postData.file, `${publicPath}uploads/tickets/${ticket._id}/${postData.filename}`, function (err) {
-                    if (err)
-                        throw err
-                })
-
-                attachments.push({
-                    owner: postData.owner,
-                    name: postData.filename,
-                    date: new Date(),
-                    path: `/uploads/tickets/${ticket._id}/${postData.filename}`,
-                    type: 'image'
-                })
-
-                if (attachments.length) {
-                    ticket.addAttachments(ticket._id, attachments, function () {
-                        ticket.save(function (err, t) {
-                            if (err) {
-                                winston.debug("Attachement add failed!");
-                            } else {
-                                res.json(response)
-                            }
-                        });
-                    });
-                }
-            } else {
-                res.json(response)
-            }
+            res.status(response.status).json(response);
         });
     });
 

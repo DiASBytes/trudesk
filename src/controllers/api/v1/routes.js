@@ -43,6 +43,7 @@ module.exports = function (middleware, router, controllers) {
     router.get('/api/v1/tickets/group/:name', apiv1, canUser('tickets:view'), apiCtrl.tickets.getByGroup)
     router.get('/api/v1/tickets/search', apiv1, canUser('tickets:view'), apiCtrl.tickets.search)
     router.post('/api/v1/tickets/create', apiv1, canUser('tickets:create'), apiCtrl.tickets.create)
+    router.post('/api/v1/tickets/create-with-file', apiv1, canUser('tickets:create'), apiCtrl.tickets.createWithFile)
     router.get('/api/v1/tickets/type/:id', apiv1, apiCtrl.tickets.getType)
     router.post('/api/v1/tickets/type/:id/removepriority', apiv1, isAdmin, apiCtrl.tickets.typeRemovePriority)
     router.post('/api/v1/tickets/type/:id/addpriority', apiv1, isAdmin, apiCtrl.tickets.typeAddPriority)
