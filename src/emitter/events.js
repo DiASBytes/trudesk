@@ -36,6 +36,8 @@ var notifications = require('../notifications') // Load Push Events
             var ticketObj = data.ticket
             var hostname = data.hostname
 
+            io.sockets.emit('ticket:updategrid')
+
             ticketSchema.getTicketById(ticketObj._id, function (err, ticket) {
                 if (err) return false
 
