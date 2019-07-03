@@ -279,10 +279,27 @@ apiUsers.createFromEmail = function (req, res) {
         return res.status(400).json({ success: false, error: 'Invalid Post Data' })
     }
 
-    UserSchema.createUserFromEmail(postData.aEmail, function (err, response) {
-        if (err) return res.status(400).json({ success: false, error: err })
+    UserSchema.getUserByEmail(postData.aEmail, function (err, response) {
+        // Doesn't exist
+        if (err) {
+            UserSchema.createUserFromEmail(postData.aEmail, function (err, response) {
+                if (err) return res.status(400).json({ success: false, error: err })
 
-        return res.json(response);
+                return res.json(response);
+            });
+        } else {
+            const user = response;
+
+            groupSchema.getAllGroupsOfUser(user.id, function (err, response) {
+                if (err) return res.status(400).json({ success: false, error: err });
+
+                return res.json({
+                    user,
+                    group: response
+                });
+            });
+
+        }
     });
 }
 
