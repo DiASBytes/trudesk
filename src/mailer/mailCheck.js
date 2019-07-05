@@ -22,7 +22,8 @@ var cheerio = require('cheerio')
 var replyParser = require('node-email-reply-parser')
 
 var fs = require('fs');
-var base64  = require('base64-stream')
+var base64 = require('base64-stream')
+var path = require('path');
 
 var emitter = require('../emitter')
 var userSchema = require('../models/user')
@@ -465,15 +466,17 @@ function handleMessages(messages) {
                                             ticket: ticket
                                         })
 
-                                        if(message.attachments && message.attachments.length > 0) {
+                                        if (message.attachments && message.attachments.length > 0) {
                                             const attachments = [];
 
-                                            if (!fs.existsSync(`./public/uploads/tickets/${ticket._id}`))
-                                                fs.mkdirSync(`./public/uploads/tickets/${ticket._id}`);
-        
-                                            for(var i = 0; i < message.attachments.length; i++) {
+                                            const publicPath = path.join(__dirname, '../../public/');
+
+                                            if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
+                                                fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
+
+                                            for (var i = 0; i < message.attachments.length; i++) {
                                                 fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
-                                                    if (err) 
+                                                    if (err)
                                                         throw err
                                                 })
 
@@ -485,8 +488,8 @@ function handleMessages(messages) {
                                                     type: 'image'
                                                 })
 
-                                                if(attachments.length === message.attachments.length) {
-                                                    ticket.addAttachments(ticket._id, attachments, function() {
+                                                if (attachments.length === message.attachments.length) {
+                                                    ticket.addAttachments(ticket._id, attachments, function () {
                                                         ticket.save(function (err, t) {
                                                             if (err) {
                                                                 winston.debug("Attachement add failed!");
@@ -506,15 +509,17 @@ function handleMessages(messages) {
                                         if (err)
                                             return;
 
-                                        if(message.attachments && message.attachments.length > 0) {
+                                        if (message.attachments && message.attachments.length > 0) {
                                             const attachments = [];
 
-                                            if (!fs.existsSync(`./public/uploads/tickets/${ticket._id}`))
-                                                fs.mkdirSync(`./public/uploads/tickets/${ticket._id}`);
-        
-                                            for(var i = 0; i < message.attachments.length; i++) {
+                                            const publicPath = path.join(__dirname, '../../public/');
+
+                                            if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
+                                                fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
+
+                                            for (var i = 0; i < message.attachments.length; i++) {
                                                 fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
-                                                    if (err) 
+                                                    if (err)
                                                         throw err
                                                 })
 
@@ -526,8 +531,8 @@ function handleMessages(messages) {
                                                     type: 'image'
                                                 })
 
-                                                if(attachments.length === message.attachments.length) {
-                                                    ticket.addAttachmentsToComment(ticket._id, attachments, function() {
+                                                if (attachments.length === message.attachments.length) {
+                                                    ticket.addAttachmentsToComment(ticket._id, attachments, function () {
                                                         ticket.save(function (err, t) {
                                                             if (err) {
                                                                 winston.debug("Comment add failed!");
