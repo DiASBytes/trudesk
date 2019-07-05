@@ -475,7 +475,7 @@ function handleMessages(messages) {
                                                 fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
 
                                             for (var i = 0; i < message.attachments.length; i++) {
-                                                fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+                                                fs.rename(message.attachments[0].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
                                                     if (err)
                                                         throw err
                                                 })
@@ -518,7 +518,7 @@ function handleMessages(messages) {
                                                 fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
 
                                             for (var i = 0; i < message.attachments.length; i++) {
-                                                fs.rename(message.attachments[0].path, `./public/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+                                                fs.rename(message.attachments[0].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
                                                     if (err)
                                                         throw err
                                                 })
