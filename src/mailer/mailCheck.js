@@ -478,12 +478,6 @@ function handleMessages(messages) {
 
                                             for (var i = 0; i < message.attachments.length; i++) {
 
-                                                console.log("RENAME ATTACHMENT");
-                                                console.log(message.attachments[i].filename);
-                                                console.log(message.attachments[i].path);
-                                                console.log(`${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`);
-
-
                                                 fs.rename(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`, function (err) {
                                                     if (err)
                                                         throw err
@@ -527,16 +521,16 @@ function handleMessages(messages) {
                                                 fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
 
                                             for (var i = 0; i < message.attachments.length; i++) {
-                                                fs.rename(message.attachments[0].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+                                                fs.rename(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`, function (err) {
                                                     if (err)
                                                         throw err
                                                 })
 
                                                 attachments.push({
                                                     owner: message.replyUser.id,
-                                                    name: message.attachments[0].filename,
+                                                    name: message.attachments[i].filename,
                                                     date: new Date(),
-                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`,
+                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[i].filename}`,
                                                     type: 'image'
                                                 })
 
