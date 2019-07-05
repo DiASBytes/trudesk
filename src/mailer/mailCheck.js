@@ -136,16 +136,16 @@ function onImapReady() {
 
 function randomFilename() { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); }
 
-function toUpper(thing) { return thing && thing.toUpperCase ? thing.toUpperCase() : thing;}
+function toUpper(thing) { return thing && thing.toUpperCase ? thing.toUpperCase() : thing; }
 
 function findAttachmentParts(struct, attachments) {
-    attachments = attachments ||  []
+    attachments = attachments || []
 
     struct.forEach((i) => {
         if (Array.isArray(i)) {
             findAttachmentParts(i, attachments)
         } else if (i.disposition && ['INLINE', 'ATTACHMENT'].indexOf(toUpper(i.disposition.type)) > -1) {
-        attachments.push(i)
+            attachments.push(i)
         }
     })
 
@@ -157,19 +157,19 @@ function buildAttMessageFunction(attachment, sqNumber) {
     var encoding = attachment.encoding;
 
     return function (msg) {
-        msg.on('body', function(stream) {
+        msg.on('body', function (stream) {
             if (!fs.existsSync('./tmp/'))
                 fs.mkdirSync('./tmp/');
 
             var writeStream = fs.createWriteStream('./tmp/' + filename);
-            
-            writeStream.on('finish', function() {
-                var message = _.find(mailCheck.messages, function(message) { return message.sqNumber === sqNumber; });
 
-                if(message) {
-                    if(!message.attachments)
+            writeStream.on('finish', function () {
+                var message = _.find(mailCheck.messages, function (message) { return message.sqNumber === sqNumber; });
+
+                if (message) {
+                    if (!message.attachments)
                         message.attachments = [];
-                
+
                     message.attachments.push({
                         filename: filename,
                         path: `./tmp/${filename}`
@@ -179,12 +179,12 @@ function buildAttMessageFunction(attachment, sqNumber) {
 
             if (toUpper(encoding) === 'BASE64') {
                 stream.pipe(new base64.Base64Decode()).pipe(writeStream);
-            } else  {
+            } else {
                 stream.pipe(writeStream);
             }
         });
 
-        msg.once('end', function() {
+        msg.once('end', function () {
             console.log('Finished attachment %s', filename);
         });
     };
@@ -230,7 +230,7 @@ function bindImapReady() {
                                 f.on('message', function (msg, sqNumber) {
                                     msg.on('body', function (stream) {
                                         var buffer = ''
-                                        
+
                                         stream.on('data', function (chunk) {
                                             buffer += chunk.toString('utf8')
                                         })
@@ -278,18 +278,18 @@ function bindImapReady() {
                                                 mailCheck.messages.push(message)
                                             })
                                         })
-                                    
-                                        msg.once('attributes', function(attrs) {
+
+                                        msg.once('attributes', function (attrs) {
                                             var attachments = findAttachmentParts(attrs.struct);
-                                            
+
                                             for (var i = 0; i < attachments.length; i++) {
                                                 var attachment = attachments[i];
-    
+
                                                 var f = mailCheck.Imap.fetch(attrs.uid, {
                                                     bodies: [attachment.partID],
                                                     struct: true
                                                 });
-    
+
                                                 f.on('message', buildAttMessageFunction(attachment, sqNumber));
                                             }
                                         });
@@ -474,17 +474,26 @@ function handleMessages(messages) {
                                             if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
                                                 fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
 
+
+
                                             for (var i = 0; i < message.attachments.length; i++) {
-                                                fs.rename(message.attachments[0].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[0].filename}`, function (err) {
+
+                                                console.log("RENAME ATTACHMENT");
+                                                console.log(message.attachments[i].filename);
+                                                console.log(message.attachments[i].path);
+                                                console.log(`${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`);
+
+
+                                                fs.rename(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`, function (err) {
                                                     if (err)
                                                         throw err
                                                 })
 
                                                 attachments.push({
                                                     owner: message.owner._id,
-                                                    name: message.attachments[0].filename,
+                                                    name: message.attachments[i].filename,
                                                     date: new Date(),
-                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[0].filename}`,
+                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[i].filename}`,
                                                     type: 'image'
                                                 })
 
