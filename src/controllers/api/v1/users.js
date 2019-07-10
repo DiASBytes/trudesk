@@ -281,7 +281,7 @@ apiUsers.createFromEmail = function (req, res) {
 
     UserSchema.getUserByEmail(postData.aEmail, function (err, response) {
         // Doesn't exist
-        if (err) {
+        if (err || !response) {
             UserSchema.createUserFromEmail(postData.aEmail, function (err, response) {
                 if (err) return res.status(400).json({ success: false, error: err })
 
