@@ -26,7 +26,7 @@ module.exports = {
                             ],
                             "TemplateID": 779007,
                             "TemplateLanguage": true,
-                            "Subject": `Your ticket #${ticket.uid} is in process`,
+                            "Subject": `New ticket #${ticket.uid}: ${ticket.subject}`,
                             "Variables": {
                                 "uid": ticket.uid,
                                 "subject": ticket.subject,
@@ -65,7 +65,7 @@ module.exports = {
                             ],
                             "TemplateID": 779757,
                             "TemplateLanguage": true,
-                            "Subject": `Your ticket #${ticket.uid} has been updated`,
+                            "Subject": `Ticket #${ticket.uid} updated: ${ticket.subject}`,
                             "Variables": {
                                 "ticket": ticket,
                                 "comments": comments
