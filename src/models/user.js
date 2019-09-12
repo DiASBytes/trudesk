@@ -518,7 +518,7 @@ userSchema.statics.createUser = function (data, callback) {
  * @param email
  * @param callback
  */
-userSchema.statics.createUserFromEmail = function (email, callback) {
+userSchema.statics.createUserFromEmail = function (email, fullname, callback) {
     if (_.isUndefined(email)) {
         return callback('Invalid User Data - UserSchema.CreatePublicUser()', null)
     }
@@ -535,7 +535,7 @@ userSchema.statics.createUserFromEmail = function (email, callback) {
             username: email,
             email: email,
             password: plainTextPass,
-            fullname: email,
+            fullname: fullname,
             role: userRoleDefault.value
         })
 

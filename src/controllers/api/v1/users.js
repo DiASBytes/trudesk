@@ -269,7 +269,7 @@ apiUsers.createFromEmail = function (req, res) {
         return res.status(400).json({ success: false, error: 'Invalid Post Data' })
     }
 
-    var propCheck = ['aEmail']
+    var propCheck = ['aEmail', 'aFullname']
 
     if (
         !_.every(propCheck, function (x) {
@@ -282,7 +282,7 @@ apiUsers.createFromEmail = function (req, res) {
     UserSchema.getUserByEmail(postData.aEmail, function (err, response) {
         // Doesn't exist
         if (err || !response) {
-            UserSchema.createUserFromEmail(postData.aEmail, function (err, response) {
+            UserSchema.createUserFromEmail(postData.aEmail, postData.aFullname, function (err, response) {
                 if (err) return res.status(400).json({ success: false, error: err })
 
                 return res.json(response);
