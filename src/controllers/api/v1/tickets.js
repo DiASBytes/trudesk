@@ -974,7 +974,19 @@ apiTickets.postComment = function (req, res) {
             ticketModel.populate(tt, 'subscribers comments.owner', function (err) {
                 if (err) return res.json({ success: true, error: null, ticket: tt })
 
-                emitter.emit('ticket:comment:added', tt, Comment, req.headers.host)
+                if (tt.status === 0) {
+                    tt.setStatus(tt.owner._id, {
+                        status: 1
+                    }, function (err, ticket) {
+                        if (err) { }
+                        tt.save(function (err, ttt) {
+                            if (err) { }
+                            emitter.emit('ticket:comment:added', ticket, Comment, req.headers.host)
+                        });
+                    });
+                } else {
+                    emitter.emit('ticket:comment:added', tt, Comment, req.headers.host)
+                }
 
                 return res.json({ success: true, error: null, ticket: tt })
             })
