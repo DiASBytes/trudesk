@@ -1,51 +1,58 @@
 version: 2.1
-
 executors:
-  docker-executor:
+  docker-publisher:
+    environment:
+      IMAGE_NAME: diasbytes/support-tickets
+      IMAGE_VERSION: 1.0.0
     docker:
-      - image: circleci/node:10-stretch
-    working_directory: ~/trudesk
-
-commands:
-  npminstall:
-    steps:
-    - restore_cache:
-        name: Restore NPM Package Cache
-        keys:
-        - npm-packages-{{ checksum "package-lock.json" }}
-    - run:
-        name: Install Dependencies
-        command: npm install
-    - save_cache:
-        name: Save NPM Package Cache
-        key: npm-packages-{{ checksum "package-lock.json" }}
-        paths:
-        - ~/.cache/npm
-
+      - image: circleci/buildpack-deps:stretch
+  node-tester:
+    docker:
+      - image: circleci/node:10.16.3
 jobs:
-  build_production:
-    docker:
-    - image: circleci/node:10-stretch
-    - image: circleci/mongo:3.6
-    working_directory: ~/trudesk
-    steps:
-    - checkout
-    - npminstall
-    - run:
-        name: Run Tests
-        command: npm run test
-    - run:
-        name: Add to know hosts
-        command: ssh-keyscan $DODOMAIN >> ~/.ssh/known_hosts
-    - run:
-        name: Deploy Digital Ocean
-        command: ssh $DOUSER@$DODOMAIN "cd /var/www/trudesk; git pull; npm install; pm2 restart trudesk;"
+  build:    
+    executor: docker-publisher
+    working_directory: ~/repo
 
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t $IMAGE_NAME:$IMAGE_VERSION .
+      - run:
+          name: Archive Docker image
+          command: docker save -o image.tar $IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+
+  publish:
+    executor: docker-publisher
+    steps:
+      - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Load archived Docker image
+          command: docker load -i /tmp/workspace/image.tar
+      - run:
+          name: Public Docker Image to Docker Hub
+          command: |
+            echo "D1ASBytes!" | docker login -u "roydiasbytes" --password-stdin
+            docker push $IMAGE_NAME:$IMAGE_VERSION
 workflows:
-  version: 2.1
-  production:
+  version: 2
+  test-build-deploy:
     jobs:
-    - build_production:
-        filters:
-          branches:
-            only: master
+      - build:
+          filters:
+            branches:
+              only: master
+      - publish:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
