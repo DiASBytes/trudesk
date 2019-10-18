@@ -30,7 +30,6 @@ node_modules
 
 #custom
 package-lock.json
-dbconfig
 dbconfig/config.json
 import.csv
 /src/mailer/templates/promo/
