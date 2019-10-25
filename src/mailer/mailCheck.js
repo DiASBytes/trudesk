@@ -158,10 +158,10 @@ function buildAttMessageFunction(attachment, sqNumber) {
 
     return function (msg) {
         msg.on('body', function (stream) {
-            if (!fs.existsSync('./tmp/'))
-                fs.mkdirSync('./tmp/');
+            if (!fs.existsSync('./public/uploads/tmp/'))
+                fs.mkdirSync('./public/uploads/tmp/');
 
-            var writeStream = fs.createWriteStream('./tmp/' + filename);
+            var writeStream = fs.createWriteStream('./public/uploads/tmp/' + filename);
 
             writeStream.on('finish', function () {
                 var message = _.find(mailCheck.messages, function (message) { return message.sqNumber === sqNumber; });
@@ -172,7 +172,7 @@ function buildAttMessageFunction(attachment, sqNumber) {
 
                     message.attachments.push({
                         filename: filename,
-                        path: `./tmp/${filename}`
+                        path: `./public/uploads/tmp/${filename}`
                     });
                 }
             });

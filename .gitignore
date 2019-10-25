@@ -59,6 +59,8 @@ public/uploads/assets/*.*
 backups/
 
 public/uploads/assets/upload/
+public/uploads/tmp/*
+!public/uploads/tmp/.gitkeep
 
 stats\.json
 
