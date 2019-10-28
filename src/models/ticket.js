@@ -50,6 +50,7 @@ var COLLECTION = 'tickets'
  * @property {Date} date ```Required``` [default: Date.now] Date Ticket was created.
  * @property {Date} updated Date ticket was last updated
  * @property {Boolean} deleted ```Required``` [default: false] If they ticket is flagged as deleted.
+ * @property {Boolean} needsAttention ```Required``` [default: false] If they ticket is flagged as deleted.
  * @property {TicketType} type ```Required``` Reference to the TicketType
  * @property {Number} status ```Required``` [default: 0] Ticket Status. (See {@link Ticket#setStatus})
  * @property {Number} priority ```Required```
@@ -81,6 +82,7 @@ var ticketSchema = mongoose.Schema({
     date: { type: Date, default: Date.now, required: true, index: true },
     updated: { type: Date },
     deleted: { type: Boolean, default: false, required: true, index: true },
+    needsAttention: { type: Boolean, default: false, required: true, index: true },
     type: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,

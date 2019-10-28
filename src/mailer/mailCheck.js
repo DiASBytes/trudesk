@@ -453,7 +453,8 @@ function handleMessages(messages) {
                                         subject: message.subject,
                                         issue: message.body,
                                         history: [HistoryItem],
-                                        subscribers: [message.owner._id]
+                                        subscribers: [message.owner._id],
+                                        needsAttention: !message.owner.email.includes('diasbytes.com')
                                     },
                                     function (err, ticket) {
                                         if (err) {
@@ -508,6 +509,9 @@ function handleMessages(messages) {
                                 )
                             } else {
                                 message.ticket.addComment(message.replyUser.id, message.reply, function () {
+
+                                    message.ticket.needsAttention = !message.replyUser.email.includes('diasbytes.com');
+
                                     message.ticket.save(function (err, ticket) {
                                         if (err)
                                             return;

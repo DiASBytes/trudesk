@@ -937,58 +937,73 @@ apiTickets.postComment = function (req, res) {
     var owner = commentJson.ownerId
     var ticketId = commentJson._id
 
-    if (_.isUndefined(ticketId)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-    var ticketModel = require('../../../models/ticket')
-    ticketModel.getTicketById(ticketId, function (err, t) {
-        if (err) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    if (_.isUndefined(ticketId)) return res.status(400).json({ success: false, error: 'Invalid Post Data' });
+    
+    var userModel = require('../../../models/user')
+    
+    userModel.findById(owner, function (err, user) {
+        if (err) return res.status(400).json({ success: false, error: 'Invalid User' })
 
-        if (_.isUndefined(comment)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+        var commentOwner = user.email;
 
-        var marked = require('marked')
-        marked.setOptions({
-            breaks: true
-        })
-
-        var Comment = {
-            owner: owner,
-            date: new Date(),
-            comment: marked(comment).replace(/<img src/g, '<img style="max-width:650px" src')
-        }
-
-        t.updated = Date.now()
-        t.comments.push(Comment)
-        var HistoryItem = {
-            action: 'ticket:comment:added',
-            description: 'Comment was added',
-            owner: owner
-        }
-        t.history.push(HistoryItem)
-
-        t.save(function (err, tt) {
-            if (err) return res.status(400).json({ success: false, error: err.message })
-
-            if (!permissions.canThis(req.user.role, 'tickets:notes')) {
-                tt.notes = []
+        var ticketModel = require('../../../models/ticket')
+    
+        ticketModel.getTicketById(ticketId, function (err, t) {
+            if (err) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    
+            if (_.isUndefined(comment)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
+    
+            var marked = require('marked')
+            marked.setOptions({
+                breaks: true
+            })
+    
+            var Comment = {
+                owner: owner,
+                date: new Date(),
+                comment: marked(comment).replace(/<img src/g, '<img style="max-width:650px" src')
             }
-
-            ticketModel.populate(tt, 'subscribers comments.owner', function (err) {
-                if (err) return res.json({ success: true, error: null, ticket: tt })
-
-                if (tt.status === 0) {
-                    tt.setStatus(tt.owner._id, {
-                        status: 1
-                    }, function (err, ticket) {
-                        if (err) { }
-                        tt.save(function (err, ttt) {
-                            if (err) { }
-                            emitter.emit('ticket:comment:added', ticket, Comment, req.headers.host)
-                        });
-                    });
-                } else {
-                    emitter.emit('ticket:comment:added', tt, Comment, req.headers.host)
+    
+            t.updated = Date.now()
+    
+            t.comments.push(Comment)
+            
+            t.needsAttention = !commentOwner.includes('diasbytes.com');
+            
+            var HistoryItem = {
+                action: 'ticket:comment:added',
+                description: 'Comment was added',
+                owner: owner
+            }
+            
+            t.history.push(HistoryItem)
+    
+            t.save(function (err, tt) {
+                if (err) return res.status(400).json({ success: false, error: err.message })
+    
+                if (!permissions.canThis(req.user.role, 'tickets:notes')) {
+                    tt.notes = []
                 }
-
-                return res.json({ success: true, error: null, ticket: tt })
+    
+                ticketModel.populate(tt, 'subscribers comments.owner', function (err) {
+                    if (err) return res.json({ success: true, error: null, ticket: tt })
+    
+                    if (tt.status === 0) {
+                        tt.setStatus(tt.owner._id, {
+                            status: 1
+                        }, function (err, ticket) {
+                            if (err) { }
+                            tt.save(function (err, ttt) {
+                                if (err) { }
+                                emitter.emit('ticket:comment:added', ticket, Comment, req.headers.host)
+                            });
+                        });
+                    } else {
+                        emitter.emit('ticket:comment:added', tt, Comment, req.headers.host)
+                    }
+    
+                    return res.json({ success: true, error: null, ticket: tt })
+                })
             })
         })
     })
