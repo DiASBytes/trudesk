@@ -478,32 +478,30 @@ function handleMessages(messages) {
 
 
                                             for (var i = 0; i < message.attachments.length; i++) {
+                                                try {
+                                                    fs.renameSync(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`);
 
-                                                fs.rename(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`, function (err) {
-                                                    if (err)
-                                                        throw err
-                                                })
-
-                                                attachments.push({
-                                                    owner: message.owner._id,
-                                                    name: message.attachments[i].filename,
-                                                    date: new Date(),
-                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[i].filename}`,
-                                                    type: 'image'
-                                                })
-
-                                                if (attachments.length === message.attachments.length) {
-                                                    ticket.addAttachments(ticket._id, attachments, function () {
-                                                        ticket.save(function (err, t) {
-                                                            if (err) {
-                                                                winston.debug("Attachement add failed!");
-                                                            } else {
-                                                                callback();
-                                                            }
-                                                        });
-                                                    });
+                                                    attachments.push({
+                                                        owner: message.owner._id,
+                                                        name: message.attachments[i].filename,
+                                                        date: new Date(),
+                                                        path: `/uploads/tickets/${ticket._id}/${message.attachments[i].filename}`,
+                                                        type: 'image'
+                                                    })
+                                                } catch (e) {
+                                                    console.log('Error renaming attachment', e);
                                                 }
                                             }
+
+                                            ticket.addAttachments(ticket._id, attachments, function () {
+                                                ticket.save(function (err, t) {
+                                                    if (err) {
+                                                        winston.debug("Attachement add failed!");
+                                                    } else {
+                                                        callback();
+                                                    }
+                                                });
+                                            });
                                         }
                                     }
                                 )
