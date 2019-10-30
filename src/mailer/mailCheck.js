@@ -275,7 +275,8 @@ function bindImapReady() {
 
                                                 }
 
-                                                mailCheck.messages.push(message)
+                                                const msg = _.clone(message);
+                                                mailCheck.messages.push(msg)
                                             })
                                         })
 
