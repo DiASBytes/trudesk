@@ -349,11 +349,13 @@ apiUsers.softDelete = function (req, res) {
     UserSchema.getUser(postData.id, function (err, user) {
         if (err) return res.status(404).json({ success: false, error: 'User not found' });
 
-        user.softDelete(function (err, success) {
-            if (err) return res.status(400).json({ success: false, error: 'Could not soft delete user' });
+        if (user && user.softDelete) {
+            user.softDelete(function (err, success) {
+                if (err) return res.status(400).json({ success: false, error: 'Could not soft delete user' });
 
-            return res.json(success);
-        });
+                return res.json(success);
+            });
+        }
     });
 }
 

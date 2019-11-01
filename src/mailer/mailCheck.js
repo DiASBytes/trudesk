@@ -355,7 +355,7 @@ function handleMessages(messages) {
 
                             // User doesn't exist. Lets create public user... If we want too
                             if (mailCheck.fetchMailOptions.createAccount) {
-                                userSchema.createUserFromEmail(message.from, function (err, response) {
+                                userSchema.createUserFromEmail(message.from, message.from, function (err, response) {
                                     if (err) return callback(err)
 
                                     if (!message.reply) {
