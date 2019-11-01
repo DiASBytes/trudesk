@@ -100,6 +100,7 @@
                         <th></th>
                         <th>Status</th>
                         <th>#</th>
+                        <th>Priority</th>
                         <th>Subject</th>
                         <th>Created</th>
                         <th>Requester</th>
@@ -123,6 +124,7 @@
                                 </td>
                                 <td class="ticket-status ticket-new"><span>New</span></td>
                                 <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
                                 <td>{{subject}}</td>
                                 <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
                                 <td>{{owner.fullname}}</td>
@@ -156,6 +158,7 @@
                                 </td>
                                 <td class="ticket-status ticket-open"><span>Open</span></td>
                                 <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
                                 <td>{{subject}}</td>
                                 <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
                                 <td>{{owner.fullname}}</td>
@@ -189,6 +192,7 @@
                                 </td>
                                 <td class="ticket-status ticket-pending"><span>Pending</span></td>
                                 <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
                                 <td>{{subject}}</td>
                                 <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
                                 <td>{{owner.fullname}}</td>
@@ -217,6 +221,7 @@
                                 </td>
                                 <td class="ticket-status ticket-closed"><span>Closed</span></td>
                                 <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
                                 <td>{{subject}}</td>
                                 <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
                                 <td>{{owner.fullname}}</td>
