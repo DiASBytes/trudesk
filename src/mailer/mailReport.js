@@ -31,7 +31,7 @@ mailReport.send = function () {
                     },
                     method: 'POST',
                     data: {
-                        startDate: '01-01-2019',
+                        startDate: moment().subtract(1, "weeks").format('MM-DD-YYYY'),
                         endDate: moment().format('MM-DD-YYYY'),
                         groups: ['-1'],
                         status: ['0', '1', '2', '3']
