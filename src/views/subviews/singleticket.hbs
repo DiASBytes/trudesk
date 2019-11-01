@@ -290,8 +290,10 @@
                             </div>
                             <div class="issue-attachments" data-ticketid="{{data.ticket._id}}">
                                 {{#each data.ticket.attachments}}
-                                    <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
-                                        <span>{{extname path}}</span>
+                                    <div 
+                                        class="issue-attachments__attachement" 
+                                        style="background-image: url('{{path}}');"
+                                        ng-click="openAttachment('{{path}}');">
                                     </div>
                                     {{!-- {{#canUserOrAdmin ../data.common.loggedInAccount "tickets:removeAttachment"}}
                                         <a href="#" class="remove-attachment" data-attachmentId="{{_id}}"><i class="fa fa-remove"></i></a>
@@ -363,8 +365,10 @@
                                                     </div>
                                                     <div class="issue-attachments">
                                                         {{#each attachments}}
-                                                            <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
-                                                                <span>{{extname path}}</span>
+                                                            <div 
+                                                                class="issue-attachments__attachement" 
+                                                                style="background-image: url('{{path}}');"
+                                                                ng-click="openAttachment('{{path}}');">
                                                             </div>
                                                         {{/each}}
                                                     </div>
@@ -445,8 +449,10 @@
                                                 </div>
                                                 <div class="issue-attachments">
                                                     {{#each attachments}}
-                                                        <div class="issue-attachments__attachement" ng-click="openAttachment('{{path}}');">
-                                                            <span>{{extname path}}</span>
+                                                        <div 
+                                                            class="issue-attachments__attachement" 
+                                                            style="background-image: url('{{path}}');"
+                                                            ng-click="openAttachment('{{path}}');">
                                                         </div>
                                                     {{/each}}
                                                 </div>

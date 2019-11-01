@@ -157,6 +157,10 @@ function buildAttMessageFunction(attachment, sqNumber) {
     var encoding = attachment.encoding;
 
     return function (msg) {
+        if(attachment.size < 5000) {
+            return;
+        }
+
         msg.on('body', function (stream) {
             if (!fs.existsSync('./public/uploads/tmp/'))
                 fs.mkdirSync('./public/uploads/tmp/');
