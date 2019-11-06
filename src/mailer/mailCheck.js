@@ -272,15 +272,17 @@ function bindImapReady() {
                                                         if (!err) {
                                                             message.reply = replyParser(mail.text, true);
                                                             message.ticket = t;
+
+                                                            const msg = _.clone(message);
+                                                            mailCheck.messages.push(msg);
                                                         } else {
                                                             winston.debug("Reply email ticket not found");
                                                         }
                                                     });
-
+                                                } else {
+                                                    const msg = _.clone(message);
+                                                    mailCheck.messages.push(msg)
                                                 }
-
-                                                const msg = _.clone(message);
-                                                mailCheck.messages.push(msg)
                                             })
                                         })
 
