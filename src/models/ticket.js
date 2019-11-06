@@ -26,6 +26,7 @@ var commentSchema = require('./comment')
 var noteSchema = require('./note')
 var attachmentSchema = require('./attachment')
 var historySchema = require('./history')
+var mailjet = require('../mailer/mailJet');
 require('./tag')
 require('./ticketpriority')
 
@@ -247,6 +248,8 @@ ticketSchema.methods.setAssignee = function (ownerId, userId, callback) {
             description: user.fullname + ' was set as assignee',
             owner: ownerId
         }
+
+        mailjet.sendTicketAssignee(self, user);
 
         self.history.push(historyItem)
 
