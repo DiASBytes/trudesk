@@ -19,11 +19,10 @@ define([
   'modules/helpers',
   'uikit',
   'easymde',
-  'markdown',
   'qrcode',
   'history',
   'angularjs/services/session',
-], function (angular, _, $, helpers, UIKit, EasyMDE, Md) {
+], function (angular, _, $, helpers, UIKit, EasyMDE) {
   return angular
     .module('trudesk.controllers.profile', ['trudesk.services.session'])
     .controller('profileCtrl', function (SessionService, $scope, $window, $http, $log, $timeout) {
@@ -52,31 +51,7 @@ define([
         var $signature = $('#signature');
         var signatureMDE = null;
 
-        var mdeToolbarItems = [        {
-          name: 'bold',
-          action: EasyMDE.toggleBold,
-          className: 'material-icons mi-bold no-ajaxy',
-          title: 'Bold'
-        },
-        {
-          name: 'italic',
-          action: EasyMDE.toggleItalic,
-          className: 'material-icons mi-italic no-ajaxy',
-          title: 'Italic'
-        },
-        {
-          name: 'Title',
-          action: EasyMDE.toggleHeadingSmaller,
-          className: 'material-icons mi-title no-ajaxy',
-          title: 'Title'
-        },
-        '|',
-        {
-          name: 'Code',
-          action: EasyMDE.toggleCodeBlock,
-          className: 'material-icons mi-code no-ajaxy',
-          title: 'Code'
-        }];
+        var mdeToolbarItems = [];
 
         var signature = SessionService.getUser().signature;
 
@@ -110,6 +85,11 @@ define([
         if (_.isUndefined(id)) return
         var data = getFormData()
 
+        var marked = require('marked')
+        marked.setOptions({
+            breaks: true
+        })
+
         $http
           .put('/api/v1/users/' + data.username, {
             aId: id,
@@ -117,8 +97,8 @@ define([
             aPass: data.password,
             aPassConfirm: data.cPassword,
             aEmail: data.email,
-            aHtmlSignature: data.signature ? Md.markdown.toHTML(data.signature) : '',
-            aSignature: data.signature ? data.signature : '',
+            aHtmlSignature: data.signature.length !== 0 ? marked(data.signature) : '',
+            aSignature: data.signature.length !== 0 ? data.signature : '',
             saveGroups: false
           })
           .success(function () {

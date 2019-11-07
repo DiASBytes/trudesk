@@ -964,6 +964,10 @@ apiTickets.postComment = function (req, res) {
                 comment: marked(comment).replace(/<img src/g, '<img style="max-width:650px" src')
             }
     
+            if(user.htmlSignature && user.htmlSignature.length !== 0) {
+                Comment.comment += user.htmlSignature;
+            }
+
             t.updated = Date.now()
     
             t.comments.push(Comment)
@@ -975,7 +979,7 @@ apiTickets.postComment = function (req, res) {
                 description: 'Comment was added',
                 owner: owner
             }
-            
+
             t.history.push(HistoryItem)
     
             t.save(function (err, tt) {

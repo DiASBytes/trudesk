@@ -60,7 +60,6 @@ require(['jquery', 'modules/helpers', 'angular', 'async', 'angularjs/services'],
             'pace',
             'easypiechart',
             'idletimer',
-            'markdown',
           ], function (_, nav, socket) {
             // React Bootstrap
             require('../../client/app.jsx')

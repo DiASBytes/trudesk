@@ -533,8 +533,8 @@ apiUsers.update = function (req, res) {
                     if (!_.isUndefined(obj.email) && obj.email.length > 0) user.email = obj.email
                     if (!_.isUndefined(obj.title) && obj.title.length > 0) user.title = obj.title
                     if (!_.isUndefined(obj.role) && obj.role.length > 0) user.role = obj.role
-                    if (!_.isUndefined(obj.signature) && obj.signature.length > 0) user.signature = obj.signature
-                    if (!_.isUndefined(obj.htmlSignature) && obj.htmlSignature.length > 0) user.htmlSignature = obj.htmlSignature
+                    if (!_.isUndefined(obj.signature)) user.signature = obj.signature
+                    if (!_.isUndefined(obj.htmlSignature)) user.htmlSignature = obj.htmlSignature
 
                     user.save(function (err, nUser) {
                         if (err) return done(err)
