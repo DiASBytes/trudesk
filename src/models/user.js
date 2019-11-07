@@ -39,6 +39,8 @@ var COLLECTION = 'accounts'
  * @property {Date} lastOnline Last timestamp given user was online.
  * @property {String} title Job Title of user
  * @property {String} image Filename of user image
+ * @property {String} signature Signature of user
+ * @property {String} htmlSignature Signature of user / HTML version
  * @property {String} resetPassHash Password reset has for recovery password link.
  * @property {Date} resetPassExpire Date when the password recovery link will expire
  * @property {String} tOTPKey One Time Password Secret Key
@@ -58,7 +60,8 @@ var userSchema = mongoose.Schema({
     lastOnline: Date,
     title: String,
     image: String,
-
+    signature: String,
+    htmlSignature: String,
     resetPassHash: { type: String, select: false },
     resetPassExpire: { type: Date, select: false },
     tOTPKey: { type: String, select: false },

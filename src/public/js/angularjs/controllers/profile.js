@@ -18,16 +18,19 @@ define([
   'jquery',
   'modules/helpers',
   'uikit',
+  'easymde',
+  'markdown',
   'qrcode',
   'history',
-  'angularjs/services/session'
-], function (angular, _, $, helpers, UIKit) {
+  'angularjs/services/session',
+], function (angular, _, $, helpers, UIKit, EasyMDE, Md) {
   return angular
     .module('trudesk.controllers.profile', ['trudesk.services.session'])
     .controller('profileCtrl', function (SessionService, $scope, $window, $http, $log, $timeout) {
       $scope.init = function () {
         // Fix Inputs if input is preloaded with a value
         fixInputLabels()
+        setupSignatureField()
       }
 
       function fixInputLabels () {
@@ -45,6 +48,61 @@ define([
         }, 0)
       }
 
+      function setupSignatureField () {
+        var $signature = $('#signature');
+        var signatureMDE = null;
+
+        var mdeToolbarItems = [        {
+          name: 'bold',
+          action: EasyMDE.toggleBold,
+          className: 'material-icons mi-bold no-ajaxy',
+          title: 'Bold'
+        },
+        {
+          name: 'italic',
+          action: EasyMDE.toggleItalic,
+          className: 'material-icons mi-italic no-ajaxy',
+          title: 'Italic'
+        },
+        {
+          name: 'Title',
+          action: EasyMDE.toggleHeadingSmaller,
+          className: 'material-icons mi-title no-ajaxy',
+          title: 'Title'
+        },
+        '|',
+        {
+          name: 'Code',
+          action: EasyMDE.toggleCodeBlock,
+          className: 'material-icons mi-code no-ajaxy',
+          title: 'Code'
+        }];
+
+        var signature = SessionService.getUser().signature;
+
+        if ($signature.length > 0) {
+          signatureMDE = new EasyMDE({
+            element: $signature[0],
+            forceSync: true,
+            initialValue: signature,
+            minHeight: '150px', // Slighty smaller to adjust the scroll
+            toolbar: mdeToolbarItems,
+            autoDownloadFontAwesome: false
+          })
+  
+          signatureMDE.codemirror.setOption('extraKeys', {
+            'Ctrl-Enter': function (cm) {
+              var $submitButton = $(cm.display.wrapper)
+                .parents('form')
+                .find('#comment-reply-submit-button')
+              if ($submitButton) {
+                $submitButton.click()
+              }
+            }
+          })
+        }
+      }
+
       $scope.updateUser = function ($event) {
         $event.preventDefault()
 
@@ -59,7 +117,8 @@ define([
             aPass: data.password,
             aPassConfirm: data.cPassword,
             aEmail: data.email,
-
+            aHtmlSignature: data.signature ? Md.markdown.toHTML(data.signature) : '',
+            aSignature: data.signature ? data.signature : '',
             saveGroups: false
           })
           .success(function () {
@@ -270,6 +329,7 @@ define([
         data.password = $('#aPass').val()
         data.cPassword = $('#aPassConfirm').val()
         data.email = $('#aEmail').val()
+        data.signature = $('#signature').val()
 
         return data
       }
