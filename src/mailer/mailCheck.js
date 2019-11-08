@@ -157,7 +157,7 @@ function buildAttMessageFunction(attachment, sqNumber) {
     var encoding = attachment.encoding;
 
     return function (msg) {
-        if(attachment.size < 5000) {
+        if (attachment.size < 5000) {
             return;
         }
 
@@ -268,7 +268,10 @@ function bindImapReady() {
                                                 // Check if email is a reply
                                                 var isReply = mail.subject.match(/#[1-9]\d*\b/g);
                                                 if (isReply) {
-                                                    Ticket.getTicketByUid(isReply[0].substr(1), function (err, t) {
+                                                    const replyUid = isReply[0].substr(1);
+                                                    winston.debug(`New email reply: ${replyUid}`);
+
+                                                    Ticket.getTicketByUid(replyUid, function (err, t) {
                                                         if (!err) {
                                                             message.reply = replyParser(mail.text, true);
                                                             message.ticket = t;
@@ -337,7 +340,10 @@ mailCheck.fetchMail = function () {
 }
 
 function handleMessages(messages) {
+
     messages.forEach(function (message) {
+        winston.debug(`Handling message, ticket id: ${message.ticket.uid}, ${message.subject}`);
+
         if (
             !_.isUndefined(message.from) &&
             !_.isEmpty(message.from) &&
@@ -514,12 +520,15 @@ function handleMessages(messages) {
                                 )
                             } else {
                                 message.ticket.addComment(message.replyUser.id, message.reply, function () {
+                                    winston.debug(`Added comment to ticket ${message.ticket.uid}`);
 
                                     message.ticket.needsAttention = !message.replyUser.email.includes('diasbytes.com');
 
                                     message.ticket.save(function (err, ticket) {
-                                        if (err)
+                                        if (err) {
+                                            winston.debug(`Error saving ticket`, err);
                                             return;
+                                        }
 
                                         if (message.attachments && message.attachments.length > 0) {
                                             const attachments = [];
