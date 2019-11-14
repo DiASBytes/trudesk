@@ -435,6 +435,11 @@ ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
 
     if (_.isUndefined(commentText)) return callback('Invalid comment', null)
 
+    // If ticket closed, reopen
+    if (self.status === 3) {
+        self.status = 1;
+    }
+
     var marked = require('marked')
 
     marked.setOptions({
