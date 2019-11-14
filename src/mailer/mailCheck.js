@@ -505,13 +505,14 @@ function handleMessages(messages) {
                                             for (var i = 0; i < message.attachments.length; i++) {
                                                 try {
                                                     fs.renameSync(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`);
-
+                                                    var ext = message.attachments[i].path.split('.').pop().toLowerCase();
+                                                    var isImage = ext === "jpg" || ext === "png" || ext === "jpeg";
                                                     attachments.push({
                                                         owner: message.owner._id,
                                                         name: message.attachments[i].filename,
                                                         date: new Date(),
                                                         path: `/uploads/tickets/${ticket._id}/${message.attachments[i].filename}`,
-                                                        type: 'image'
+                                                        type: isImage ? 'image' : `.${ext}`
                                                     })
                                                 } catch (e) {
                                                     console.log('Error renaming attachment', e);

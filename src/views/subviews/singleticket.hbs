@@ -294,6 +294,7 @@
                                         class="issue-attachments__attachement" 
                                         style="background-image: url('{{path}}');"
                                         ng-click="openAttachment('{{path}}');">
+                                        {{#compare type '!=' 'image'}}{{type}}{{/compare}}
                                     </div>
                                     {{!-- {{#canUserOrAdmin ../data.common.loggedInAccount "tickets:removeAttachment"}}
                                         <a href="#" class="remove-attachment" data-attachmentId="{{_id}}"><i class="fa fa-remove"></i></a>
