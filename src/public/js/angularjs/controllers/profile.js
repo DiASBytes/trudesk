@@ -53,7 +53,7 @@ define([
 
         var mdeToolbarItems = [];
 
-        var signature = SessionService.getUser().signature;
+        var signature = $('#signatureValue').val();
 
         if ($signature.length > 0) {
           signatureMDE = new EasyMDE({

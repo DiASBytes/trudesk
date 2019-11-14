@@ -2539,17 +2539,6 @@ eval("var baseToString = __webpack_require__(/*! ./_baseToString */ \"./node_mod
 
 /***/ }),
 
-/***/ "./node_modules/markdown/lib/index.js":
-/*!********************************************!*\
-  !*** ./node_modules/markdown/lib/index.js ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-eval("throw new Error(\"Module build failed: Error: ENOENT: no such file or directory, open '/Users/thomasvangroenweghe/Sites/diasbytes/support/trudesk/node_modules/markdown/lib/index.js'\");\n\n//# sourceURL=webpack:///./node_modules/markdown/lib/index.js?");
-
-/***/ }),
-
 /***/ "./node_modules/mobx-react/index.module.js":
 /*!*************************************************!*\
   !*** ./node_modules/mobx-react/index.module.js ***!
