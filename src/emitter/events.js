@@ -421,11 +421,19 @@ var notifications = require('../notifications') // Load Push Events
 
                                         let comments = _.sortBy(t.comments, function (o) { return moment(o.date); }).reverse()
 
-                                        // ticket.comments = comments.map(function(comment) {
-                                        //   return { ...comment, date = moment(comment.date).format('MMMM Do YYYY, HH:mm:ss') };
-                                        // });
+                                        const formattedComments = comments.reduce(function(arr, comment) {
+                                            var c = {
+                                                owner: comment.owner,
+                                                comment: comment.comment,
+                                                date: moment(comment.date).format('MMMM Do YYYY, HH:mm:ss')
+                                            };
 
-                                        mailJet.sendCommentAdded(t, comments, emails)
+                                            arr.push(c);
+
+                                            return arr;
+                                        }, []);
+
+                                        mailJet.sendCommentAdded(t, formattedComments, emails)
                                     })
                                 }
                             )
