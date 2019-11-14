@@ -136,6 +136,8 @@ function onImapReady() {
 
 function randomFilename() { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); }
 
+function safeFilename(filename) { return filename.replace(/[^a-z0-9]/gi, '-').toLowerCase() }
+
 function toUpper(thing) { return thing && thing.toUpperCase ? thing.toUpperCase() : thing; }
 
 function findAttachmentParts(struct, attachments) {
@@ -153,7 +155,16 @@ function findAttachmentParts(struct, attachments) {
 }
 
 function buildAttMessageFunction(attachment, sqNumber) {
-    var filename = randomFilename() + '.' + attachment.subtype;
+    var ext = attachment.subtype;
+    var name = randomFilename();
+
+    if (attachment.params && attachment.params.name && attachment.params.name.indexOf('.') > -1) {
+        var tmp = attachment.params.name.split('.');
+        ext = tmp.pop();
+        name = safeFilename(tmp.join(''));
+    }
+
+    var filename = name + '-' + new Date().valueOf() + '.' + ext;
     var encoding = attachment.encoding;
 
     return function (msg) {
@@ -342,8 +353,6 @@ mailCheck.fetchMail = function () {
 function handleMessages(messages) {
 
     messages.forEach(function (message) {
-        winston.debug(`Handling message, ticket id: ${message.ticket.uid}, ${message.subject}`);
-
         if (
             !_.isUndefined(message.from) &&
             !_.isEmpty(message.from) &&
