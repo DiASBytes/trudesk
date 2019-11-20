@@ -35,6 +35,7 @@ var notifications = require('../notifications') // Load Push Events
         emitter.on('ticket:created', function (data) {
             var ticketObj = data.ticket
             var hostname = data.hostname
+            var requester = data.requester
 
             io.sockets.emit('ticket:updategrid')
 
@@ -79,9 +80,11 @@ var notifications = require('../notifications') // Load Push Events
 
                                             emails = _.uniq(emails)
 
+                                            var requesterIsAdmin = requester && requester.role && requester.role.isAdmin;
+
                                             // Only send email when status = 'Open'
-                                            if (ticket.status === 0) {
-                                                mailJet.sendTicketCreated(ticket, emails).then(function (data) {
+                                            if (ticket.status === 0 && !requesterIsAdmin) {
+                                                mailJet.sendTicketCreated(ticket).then(function (data) {
                                                     console.log('data', data);
                                                 }).catch((err) => {
                                                     console.log('err', err);

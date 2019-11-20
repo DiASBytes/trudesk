@@ -2,7 +2,7 @@ const config = require('../../config/config');
 const mailjet = require('node-mailjet').connect(config.mailjet.public, config.mailjet.private);
 
 module.exports = {
-    sendTicketCreated: (ticket, emails) => {
+    sendTicketCreated: (ticket) => {
         return new Promise(async (resolve, reject) => {
             try {
                 await mailjet.post('send', { 'version': 'v3.1' }).request({

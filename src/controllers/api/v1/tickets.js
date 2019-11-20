@@ -477,7 +477,8 @@ apiTickets.create = function (req, res) {
         emitter.emit('ticket:created', {
             hostname: req.headers.host,
             socketId: socketId,
-            ticket: response.ticket
+            ticket: response.ticket,
+            requester: req.user
         });
 
         res.status(response.status).json(response);
