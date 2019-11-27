@@ -513,7 +513,7 @@ ticketsController.uploadImageMDE = function (req, res) {
     if (!object.ticketId) return res.status(400).json({ success: false })
 
     busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-        if (mimetype.indexOf('image/') === -1) {
+        if (mimetype.indexOf('image/') === -1 && mimetype.indexOf('application') === -1) {
             error = {
                 status: 500,
                 message: 'Invalid File Type'

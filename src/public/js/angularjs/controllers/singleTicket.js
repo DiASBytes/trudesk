@@ -265,6 +265,7 @@ define([
           }
         })
 
+        // docs: https://inlineattachment.readthedocs.io/en/latest/pages/configuration.html
         $window.inlineAttachment.editors.codemirror4.attach(commentMDE.codemirror, {
           onFileUploadResponse: function (xhr) {
             var result = JSON.parse(xhr.responseText)
@@ -290,13 +291,22 @@ define([
             var text = this.editor.getValue() + ' ' + result
             this.editor.setValue(text)
           },
+          allowedTypes: ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'application/pdf'],
           extraHeaders: {
             ticketid: $('#__ticketId').text()
           },
           errorText: 'Error uploading file: ',
           uploadUrl: '/tickets/uploadmdeimage',
           jsonFieldName: 'filename',
-          urlText: '![Image]({filename})'
+          urlText: function(filename) {
+            const extension = filename.split('.').pop();
+            
+            if(extension === 'pdf') {
+              return '[Pdf](' + filename + ')';
+            }
+
+            return '![Image](' + filename + ')';
+          }
         })
 
         attachFileDesc($commentReply)
