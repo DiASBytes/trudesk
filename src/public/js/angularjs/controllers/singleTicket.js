@@ -286,6 +286,11 @@ define([
             }
             return false
           },
+          remoteFilename: function(file) {
+            if(file && file.name) {
+              return file.name;
+            }
+          },
           onFileUploadError: function (xhr) {
             var result = xhr.responseText
             var text = this.editor.getValue() + ' ' + result
@@ -298,11 +303,11 @@ define([
           errorText: 'Error uploading file: ',
           uploadUrl: '/tickets/uploadmdeimage',
           jsonFieldName: 'filename',
-          urlText: function(filename) {
+          urlText: function(filename, result) {
             const extension = filename.split('.').pop();
             
             if(extension === 'pdf') {
-              return '[Pdf](' + filename + ')';
+              return '[' + result.original + '](' + filename + ')';
             }
 
             return '![Image](' + filename + ')';

@@ -508,6 +508,7 @@ ticketsController.uploadImageMDE = function (req, res) {
 
     var object = {}
     var error
+    var name
 
     object.ticketId = req.headers.ticketid
     if (!object.ticketId) return res.status(400).json({ success: false })
@@ -523,6 +524,8 @@ ticketsController.uploadImageMDE = function (req, res) {
         }
 
         var ext = path.extname(filename)
+        
+        name = filename
 
         var savePath = path.join(__dirname, '../../public/uploads/tickets', object.ticketId)
 
@@ -572,7 +575,7 @@ ticketsController.uploadImageMDE = function (req, res) {
 
         var fileUrl = '/uploads/tickets/' + object.ticketId + '/inline_' + object.filename
 
-        return res.json({ filename: fileUrl, ticketId: object.ticketId })
+        return res.json({ filename: fileUrl, ticketId: object.ticketId, original: name })
     })
 
     req.pipe(busboy)

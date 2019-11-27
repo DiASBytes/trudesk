@@ -962,7 +962,7 @@ apiTickets.postComment = function (req, res) {
             var Comment = {
                 owner: owner,
                 date: new Date(),
-                comment: marked(comment).replace(/<img src/g, '<img style="max-width:650px" src')
+                comment: marked(comment).replace(/<img src/g, '<img style="max-width:650px" src').replace(/<a/g, '<a target="_blank"')
             }
     
             if(user.htmlSignature && user.htmlSignature.length !== 0) {
