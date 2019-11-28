@@ -155,7 +155,7 @@ ticketsController.getActive = function (req, res, next) {
     processor.object = {
         limit: 50,
         page: page,
-        status: [0, 1, 2]
+        status: [0, 1, 2, 4, 5, 6, 7]
     }
 
     req.processor = processor
