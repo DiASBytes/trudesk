@@ -159,8 +159,12 @@ define('modules/ui', [
       if (tStatusBox.length > 0) {
         tStatusBox.removeClass('ticket-new')
         tStatusBox.removeClass('ticket-open')
-        tStatusBox.removeClass('ticket-pending')
+        tStatusBox.removeClass('ticket-development')
         tStatusBox.removeClass('ticket-closed')
+        tStatusBox.removeClass('ticket-waitingforinfo')
+        tStatusBox.removeClass('ticket-2ndline')
+        tStatusBox.removeClass('ticket-planning')
+        tStatusBox.removeClass('ticket-intervention')
 
         var s = 'New'
         var c = 'ticket-new'
@@ -174,12 +178,28 @@ define('modules/ui', [
             c = 'ticket-open'
             break
           case 2:
-            s = 'Pending'
-            c = 'ticket-pending'
+            s = 'Development'
+            c = 'ticket-development'
             break
           case 3:
             s = 'Closed'
             c = 'ticket-closed'
+            break
+          case 4:
+            s = 'Waiting for info'
+            c = 'ticket-waitingforinfo'
+            break
+          case 5:
+            s = '2nd line'
+            c = 'ticket-2ndline'
+            break
+          case 6:
+            s = 'Planning'
+            c = 'ticket-planning'
+            break
+          case 7:
+            s = 'Intervention'
+            c = 'ticket-intervention'
             break
         }
 

@@ -124,14 +124,48 @@ class Sidebar extends React.Component {
                 active={activeSubItem === 'tickets-unassigned'}
               />
               <NavSeparator />
-              <SubmenuItem text='New' icon='&#xE24D;' href='/tickets/new' active={activeSubItem === 'tickets-new'} />
-              <SubmenuItem
-                text='Pending'
-                icon='&#xE629;'
-                href='/tickets/pending'
-                active={activeSubItem === 'tickets-pending'}
+              <SubmenuItem 
+                text='New' 
+                icon='&#xE24D;' 
+                href='/tickets/new' 
+                active={activeSubItem === 'tickets-new'} 
               />
-              <SubmenuItem text='Open' icon='&#xE2C8;' href='/tickets/open' active={activeSubItem === 'tickets-open'} />
+              <SubmenuItem 
+                text='Open' 
+                icon='&#xE2C8;' 
+                href='/tickets/open' 
+                active={activeSubItem === 'tickets-open'} 
+              />
+              <SubmenuItem
+                text='Waiting for info'
+                icon='&#xE629;'
+                href='/tickets/waitingforinfo'
+                active={activeSubItem === 'tickets-waitingforinfo'}
+              />
+              <SubmenuItem
+                text='2nd line'
+                icon='&#xE629;'
+                href='/tickets/2ndline'
+                active={activeSubItem === 'tickets-2ndline'}
+              />
+              <SubmenuItem
+                text='Planning'
+                icon='&#xE629;'
+                href='/tickets/planning'
+                active={activeSubItem === 'tickets-planning'}
+              />
+              <SubmenuItem
+                text='Intervention'
+                icon='&#xE629;'
+                href='/tickets/intervention'
+                active={activeSubItem === 'tickets-intervention'}
+              />
+              <SubmenuItem
+                text='Development'
+                icon='&#xE629;'
+                href='/tickets/develoment'
+                active={activeSubItem === 'tickets-development'}
+              />
               <SubmenuItem
                 text='Closed'
                 icon='&#xE2C7;'

@@ -808,10 +808,22 @@ var helpers = {
         str = 'Open'
         break
       case 2:
-        str = 'Pending'
+        str = 'Development'
         break
       case 3:
         str = 'Closed'
+        break
+      case 4:
+        str = 'Waiting for info'
+        break
+      case 5:
+        str = '2nd line'
+        break
+      case 6:
+        str = 'Planning'
+        break
+      case 7:
+        str = 'Intervention'
         break
       default:
         str = 'New'

@@ -38,12 +38,12 @@
                         {{#is data.ticket.status 2}}
                             {{#canUserOrAdmin data.common.loggedInAccount "agent:*"}}
                                 {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role "tickets:update"}}
-                                    <div title="Change Status" class="ticket-status ticket-pending cursor-pointer" ng-click="showStatusSelect()"><span>Pending</span></div>
+                                    <div title="Change Status" class="ticket-status ticket-development cursor-pointer" ng-click="showStatusSelect()"><span>Development</span></div>
                                 {{else}}
-                                    <div class="ticket-status ticket-pending"><span>Pending</span></div>
+                                    <div class="ticket-status ticket-development"><span>Development</span></div>
                                 {{/hasPermOverRole}}
                             {{else}}
-                                <div class="ticket-status ticket-pending"><span>Pending</span></div>
+                                <div class="ticket-status ticket-development"><span>Development</span></div>
                             {{/canUserOrAdmin}}
                         {{/is}}
                         {{#is data.ticket.status 3}}
@@ -57,12 +57,60 @@
                                 <div class="ticket-status ticket-closed"><span>Closed</span></div>
                             {{/canUserOrAdmin}}
                         {{/is}}
-                        <span class="drop-icon material-icons" style="left: auto; right: 22px; bottom: -18px">keyboard_arrow_down</span>
+                        {{#is data.ticket.status 4}}
+                            {{#canUserOrAdmin data.common.loggedInAccount "agent:*"}}
+                                {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role "tickets:update"}}
+                                    <div title="Change Status" class="ticket-status ticket-waitingforinfo cursor-pointer" ng-click="showStatusSelect()"><span>Waiting for info</span></div>
+                                {{else}}
+                                    <div class="ticket-status ticket-waitingforinfo"><span>Waiting for info</span></div>
+                                {{/hasPermOverRole}}
+                            {{else}}
+                                <div class="ticket-status ticket-waitingforinfo"><span>Waiting for info</span></div>
+                            {{/canUserOrAdmin}}
+                        {{/is}}
+                        {{#is data.ticket.status 5}}
+                            {{#canUserOrAdmin data.common.loggedInAccount "agent:*"}}
+                                {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role "tickets:update"}}
+                                        <div title="Change Status" class="ticket-status ticket-2ndline cursor-pointer" ng-click="showStatusSelect()"><span>2nd line</span></div>
+                                {{else}}
+                                    <div class="ticket-status ticket-2ndline"><span>2nd line</span></div>
+                                {{/hasPermOverRole}}
+                            {{else}}
+                                <div class="ticket-status ticket-2ndline"><span>2nd line</span></div>
+                            {{/canUserOrAdmin}}
+                        {{/is}}
+                        {{#is data.ticket.status 6}}
+                            {{#canUserOrAdmin data.common.loggedInAccount "agent:*"}}
+                                {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role "tickets:update"}}
+                                    <div title="Change Status" class="ticket-status ticket-planning cursor-pointer" ng-click="showStatusSelect()"><span>Planning</span></div>
+                                {{else}}
+                                    <div class="ticket-status ticket-planning"><span>Planning</span></div>
+                                {{/hasPermOverRole}}
+                            {{else}}
+                                <div class="ticket-status ticket-planning"><span>Planning</span></div>
+                            {{/canUserOrAdmin}}
+                        {{/is}}
+                        {{#is data.ticket.status 7}}
+                            {{#canUserOrAdmin data.common.loggedInAccount "agent:*"}}
+                                {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role "tickets:update"}}
+                                    <div title="Change Status" class="ticket-status ticket-intervention cursor-pointer" ng-click="showStatusSelect()"><span>Intervention</span></div>
+                                {{else}}
+                                    <div class="ticket-status ticket-intervention"><span>Intervention</span></div>
+                                {{/hasPermOverRole}}
+                            {{else}}
+                                <div class="ticket-status ticket-intervention"><span>Intervention</span></div>
+                            {{/canUserOrAdmin}}
+                        {{/is}}                        
+                        <span class="drop-icon material-icons" style="left: auto; right: 42px; bottom: -18px">keyboard_arrow_down</span>
                         <div id="statusSelect" close-mouse-up class="hide">
                             <ul>
                                 <li class="ticket-status ticket-new" ng-click="changeStatus(0)"><span>New</span></li>
                                 <li class="ticket-status ticket-open" ng-click="changeStatus(1)"><span>Open</span></li>
-                                <li class="ticket-status ticket-pending" ng-click="changeStatus(2)"><span>Pending</span></li>
+                                <li class="ticket-status ticket-waitingforinfo" ng-click="changeStatus(4)"><span>Waiting for info</span></li>
+                                <li class="ticket-status ticket-2ndline" ng-click="changeStatus(5)"><span>2nd line</span></li>
+                                <li class="ticket-status ticket-planning" ng-click="changeStatus(6)"><span>Planning</span></li>
+                                <li class="ticket-status ticket-intervention" ng-click="changeStatus(7)"><span>Intervention</span></li>
+                                <li class="ticket-status ticket-development" ng-click="changeStatus(2)"><span>Development</span></li>
                                 <li class="ticket-status ticket-closed" ng-click="changeStatus(3)"><span>Closed</span></li>
                             </ul>
                         </div>

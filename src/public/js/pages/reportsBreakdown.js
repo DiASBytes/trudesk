@@ -130,10 +130,22 @@ define('pages/reportsBreakdown', [
                   status = 'open'
                   break
                 case 2:
-                  status = 'pending'
+                  status = 'development'
                   break
                 case 3:
                   status = 'closed'
+                  break
+                case 4:
+                  status = 'waitingforinfo'
+                  break
+                case 5:
+                  status = '2ndline'
+                  break
+                case 6:
+                  status = 'planning'
+                  break
+                case 7:
+                  status = 'intervention'
                   break
               }
               html += '<tr class="uk-table-middle">'

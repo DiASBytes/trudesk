@@ -156,8 +156,20 @@ angular
         case 1:
           status = 'Open'
           break
+        case 4:
+          status = 'Waiting for info'
+          break
+        case 5:
+          status = '2nd line'
+          break
+        case 6:
+          status = 'Planning'
+          break
+        case 7:
+          status = 'Intervention'
+          break
         case 2:
-          status = 'Pending'
+          status = 'Development'
           break
         case 3:
           status = 'Closed'
@@ -2377,7 +2389,7 @@ angular
     $scope.showStatusActionSheet = function () {
       $scope.popover.hide()
       $ionicActionSheet.show({
-        buttons: [{ text: 'Open' }, { text: 'Pending' }, { text: 'Closed' }],
+        buttons: [{ text: 'Open' }, { text: 'Waiting for info' }, { text: '2nd line' }, { text: 'Planning' }, { text: 'Intervention' }, { text: 'Development' }, { text: 'Closed' }],
         titleText: 'Set Ticket Status',
         cancelText: 'Cancel',
         cancel: function () {

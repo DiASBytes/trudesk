@@ -39,6 +39,7 @@ div#accountsTable_wrapper
   font-weight: 300
   font-family: "Roboto", sans-serif
   color: white
+  width: 100px
   background: $ticket_status_closed
   +borderRadius(3px)
 
@@ -48,12 +49,24 @@ div#accountsTable_wrapper
 .ticket-status.ticket-new span,
 .ticket-status-new
   background: $ticket_status_new !important
-.ticket-status.ticket-pending span,
-.ticket-status-pending
-  background: $ticket_status_pending !important
+.ticket-status.ticket-development span,
+.ticket-status-development
+  background: $ticket_status_development !important
 .ticket-status.ticket-closed span,
 .ticket-status-closed
   background: $ticket_status_closed !important
+.ticket-status.ticket-waitingforinfo span,
+.ticket-status-waitingforinfo
+  background: $ticket_status_waitingforinfo !important
+.ticket-status.ticket-2ndline span,
+.ticket-status-2ndline
+  background: $ticket_status_2ndline !important
+.ticket-status.ticket-planning span,
+.ticket-status-planning
+  background: $ticket_status_planning !important
+.ticket-status.ticket-intervention span,
+.ticket-status-intervention
+  background: $ticket_status_intervention !important
 
 .ticket-priority
   border-left: 10px solid transparent
@@ -82,7 +95,7 @@ div#accountsTable_wrapper
       padding: 0 !important
       margin: 0 !important
     &.shown
-      height: 124px !important
+      height: 234px !important
       opacity: 1 !important
 
 #statusSelect

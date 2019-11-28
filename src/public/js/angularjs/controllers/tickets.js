@@ -345,7 +345,7 @@ define([
         })
       }
 
-      $scope.setPendingTickets = function () {
+      $scope.setDevelopmentTickets = function () {
         var $ids = getChecked()
 
         _.each($ids, function (id) {
@@ -354,10 +354,10 @@ define([
               status: 2
             })
             .success(function () {
-              helpers.UI.showSnackbar('Ticket status set to pending', false)
+              helpers.UI.showSnackbar('Ticket status set to development', false)
             })
             .error(function (e) {
-              $log.error('[trudes:tickets:setPendingTickets] - Error ', e)
+              $log.error('[trudes:tickets:setDevelopmentTickets] - Error ', e)
               helpers.UI.showSnackbar('An Error occurred. Please check console.', true)
             })
         })
@@ -376,6 +376,78 @@ define([
             })
             .error(function (e) {
               $log.error('[trudesk:tickets:closeTickets] - Error', e)
+              helpers.UI.showSnackbar('An Error occurred. Please check console.', true)
+            })
+        })
+      }
+
+      $scope.setWaitingForInfoTickets = function () {
+        var $ids = getChecked()
+
+        _.each($ids, function (id) {
+          $http
+            .put('/api/v1/tickets/' + id, {
+              status: 4
+            })
+            .success(function () {
+              helpers.UI.showSnackbar('Ticket status set to waiting for info', false)
+            })
+            .error(function (e) {
+              $log.error('[trudes:tickets:setWaitingForInfoTickets] - Error ', e)
+              helpers.UI.showSnackbar('An Error occurred. Please check console.', true)
+            })
+        })
+      }
+
+      $scope.set2ndLineTickets = function () {
+        var $ids = getChecked()
+
+        _.each($ids, function (id) {
+          $http
+            .put('/api/v1/tickets/' + id, {
+              status: 5
+            })
+            .success(function () {
+              helpers.UI.showSnackbar('Ticket status set to 2nd line', false)
+            })
+            .error(function (e) {
+              $log.error('[trudes:tickets:set2LineTickets] - Error ', e)
+              helpers.UI.showSnackbar('An Error occurred. Please check console.', true)
+            })
+        })
+      }
+
+      $scope.setPlanningTickets = function () {
+        var $ids = getChecked()
+
+        _.each($ids, function (id) {
+          $http
+            .put('/api/v1/tickets/' + id, {
+              status: 6
+            })
+            .success(function () {
+              helpers.UI.showSnackbar('Ticket status set to planning', false)
+            })
+            .error(function (e) {
+              $log.error('[trudes:tickets:setPlanningTickets] - Error ', e)
+              helpers.UI.showSnackbar('An Error occurred. Please check console.', true)
+            })
+        })
+      }
+
+      $scope.setInterventionTickets = function () {
+        var $ids = getChecked()
+
+        _.each($ids, function (id) {
+          $http
+            .put('/api/v1/tickets/' + id, {
+              status: 7
+            })
+            .success(function () {
+              helpers.UI.showSnackbar('Ticket status set to intervention', false)
+            })
+            .error(function (e) {
+              $log.error('[trudes:tickets:setInterventionTickets] - Error ', e)
               helpers.UI.showSnackbar('An Error occurred. Please check console.', true)
             })
         })

@@ -66,7 +66,11 @@
                                         {{#canUserOrAdmin data.user "agent:*"}}
                                             <li><hr style="margin: 5px 0;"></li>
                                             <li><a href="#" class="no-ajaxy" role="button" ng-click="setOpenTickets()">Set Open</a></li>
-                                            <li><a href="#" class="no-ajaxy" role="button" ng-click="setPendingTickets()">Set Pending</a></li>
+                                            <li><a href="#" class="no-ajaxy" role="button" ng-click="setDevelopmentTickets()">Set Waiting for info</a></li>
+                                            <li><a href="#" class="no-ajaxy" role="button" ng-click="set2ndLineTickets()">Set 2nd line</a></li>
+                                            <li><a href="#" class="no-ajaxy" role="button" ng-click="setPlanningTickets()">Set Planning</a></li>
+                                            <li><a href="#" class="no-ajaxy" role="button" ng-click="setInterventionTickets()">Set Intervention</a></li>
+                                            <li><a href="#" class="no-ajaxy" role="button" ng-click="setDevelopmentTickets()">Set Development</a></li>
                                             {{!-- <li><a href="#" class="no-ajaxy" role="button" ng-click="setClosedTickets()">Set Closed</a></li> --}}
                                         {{else}}
                                         {{/canUserOrAdmin}}
@@ -180,7 +184,7 @@
                             </tr>
                         {{/is}}
                         {{#is status 2}}
-                            <tr class="ticket-pending" data-ticket="{{uid}}" data-ticketOid="{{_id}}">
+                            <tr class="ticket-development" data-ticket="{{uid}}" data-ticketOid="{{_id}}">
                                 <td class="ticket-priority" style="border-color: {{priority.htmlColor}}">
                                     <input type="checkbox" id="c_{{_id}}" style="display: none;" class="svgcheckinput">
                                     <label for="c_{{_id}}" class="svgcheck">
@@ -190,7 +194,7 @@
                                         </svg>
                                     </label>
                                 </td>
-                                <td class="ticket-status ticket-pending"><span>Pending</span></td>
+                                <td class="ticket-status ticket-development"><span>Development</span></td>
                                 <td>{{uid}}</td>
                                 <td>{{priority.name}}</td>
                                 <td>{{subject}}</td>
@@ -220,6 +224,122 @@
                                     <label for="c_{{_id}}"></label>
                                 </td>
                                 <td class="ticket-status ticket-closed"><span>Closed</span></td>
+                                <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
+                                <td>{{subject}}</td>
+                                <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
+                                <td>{{owner.fullname}}</td>
+                                <td>{{group.name}}</td>
+                                <td>
+                                    {{#isNotNull assignee}}
+                                        {{assignee.fullname}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                                <td>
+                                    {{#isNotNull updated}}
+                                        {{formatDate updated (concat ../data.common.shortDateFormat ../data.common.timeFormat true true)}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                            </tr>
+                        {{/is}}
+                        {{#is status 4}}
+                            <tr class="ticket-waitingforinfo" data-ticket="{{uid}}" data-ticketOid="{{_id}}">
+                                <td class="ticket-priority ticket-priority-{{priority}}">
+                                    <input id="c_{{_id}}" type="checkbox" class="poloCheckbox"/>
+                                    <label for="c_{{_id}}"></label>
+                                </td>
+                                <td class="ticket-status ticket-waitingforinfo"><span>Waiting for info</span></td>
+                                <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
+                                <td>{{subject}}</td>
+                                <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
+                                <td>{{owner.fullname}}</td>
+                                <td>{{group.name}}</td>
+                                <td>
+                                    {{#isNotNull assignee}}
+                                        {{assignee.fullname}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                                <td>
+                                    {{#isNotNull updated}}
+                                        {{formatDate updated (concat ../data.common.shortDateFormat ../data.common.timeFormat true true)}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                            </tr>
+                        {{/is}}
+                        {{#is status 5}}
+                            <tr class="ticket-2ndline" data-ticket="{{uid}}" data-ticketOid="{{_id}}">
+                                <td class="ticket-priority ticket-priority-{{priority}}">
+                                    <input id="c_{{_id}}" type="checkbox" class="poloCheckbox"/>
+                                    <label for="c_{{_id}}"></label>
+                                </td>
+                                <td class="ticket-status ticket-2ndline"><span>2nd line</span></td>
+                                <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
+                                <td>{{subject}}</td>
+                                <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
+                                <td>{{owner.fullname}}</td>
+                                <td>{{group.name}}</td>
+                                <td>
+                                    {{#isNotNull assignee}}
+                                        {{assignee.fullname}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                                <td>
+                                    {{#isNotNull updated}}
+                                        {{formatDate updated (concat ../data.common.shortDateFormat ../data.common.timeFormat true true)}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                            </tr>
+                        {{/is}}
+                        {{#is status 6}}
+                            <tr class="ticket-planning" data-ticket="{{uid}}" data-ticketOid="{{_id}}">
+                                <td class="ticket-priority ticket-priority-{{priority}}">
+                                    <input id="c_{{_id}}" type="checkbox" class="poloCheckbox"/>
+                                    <label for="c_{{_id}}"></label>
+                                </td>
+                                <td class="ticket-status ticket-planning"><span>Planning</span></td>
+                                <td>{{uid}}</td>
+                                <td>{{priority.name}}</td>
+                                <td>{{subject}}</td>
+                                <td>{{{formatDate date ../data.common.shortDateFormat}}}</td>
+                                <td>{{owner.fullname}}</td>
+                                <td>{{group.name}}</td>
+                                <td>
+                                    {{#isNotNull assignee}}
+                                        {{assignee.fullname}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                                <td>
+                                    {{#isNotNull updated}}
+                                        {{formatDate updated (concat ../data.common.shortDateFormat ../data.common.timeFormat true true)}}
+                                    {{else}}
+                                        --
+                                    {{/isNotNull}}
+                                </td>
+                            </tr>
+                        {{/is}}
+                        {{#is status 7}}
+                            <tr class="ticket-intervention" data-ticket="{{uid}}" data-ticketOid="{{_id}}">
+                                <td class="ticket-priority ticket-priority-{{priority}}">
+                                    <input id="c_{{_id}}" type="checkbox" class="poloCheckbox"/>
+                                    <label for="c_{{_id}}"></label>
+                                </td>
+                                <td class="ticket-status ticket-intervention"><span>Intervention</span></td>
                                 <td>{{uid}}</td>
                                 <td>{{priority.name}}</td>
                                 <td>{{subject}}</td>

@@ -152,10 +152,22 @@ ticketSchema.virtual('statusFormatted').get(function () {
             formatted = 'Open'
             break
         case 2:
-            formatted = 'Pending'
+            formatted = 'Development'
             break
         case 3:
             formatted = 'Closed'
+            break
+        case 4:
+            formatted = 'Waiting for info'
+            break
+        case 5:
+            formatted = '2nd line'
+            break
+        case 6:
+            formatted = 'Planning'
+            break
+        case 7:
+            formatted = 'Intervention'
             break
         default:
             formatted = 'New'
@@ -191,8 +203,12 @@ ticketSchema.virtual('commentsAndNotes').get(function () {
  * Status:
  *      0 - New
  *      1 - Open
- *      2 - Pending
+ *      2 - Development
  *      3 - Closed
+ *      4 - Waiting for info
+ *      5 - 2nd line
+ *      6 - Planning
+ *      7 - Intervention
  */
 ticketSchema.methods.setStatus = function (ownerId, data, callback) {
     if (_.isUndefined(data) && _.isUndefined(data.status)) return callback('Invalid Status', null)
@@ -1656,10 +1672,22 @@ function statusToString(status) {
             str = 'Open'
             break
         case 2:
-            str = 'Pending'
+            str = 'Development'
             break
         case 3:
             str = 'Closed'
+            break
+        case 4:
+            str = 'Waiting for info'
+            break
+        case 5:
+            str = '2nd line'
+            break
+        case 6:
+            str = 'Planning'
+            break
+        case 7:
+            str = 'Intervention'
             break
         default:
             str = status

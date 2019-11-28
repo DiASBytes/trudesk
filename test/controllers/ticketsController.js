@@ -49,7 +49,47 @@ describe('ticketsController', function () {
         },
         function (next) {
           authAgent
-            .get('/tickets/pending')
+            .get('/tickets/waitingforinfo')
+            .set('Cookie', cookie)
+            .end(function (err) {
+              expect(err).to.not.exist
+
+              next()
+            })
+        },
+        function (next) {
+          authAgent
+            .get('/tickets/2ndline')
+            .set('Cookie', cookie)
+            .end(function (err) {
+              expect(err).to.not.exist
+
+              next()
+            })
+        },
+        function (next) {
+          authAgent
+            .get('/tickets/planning')
+            .set('Cookie', cookie)
+            .end(function (err) {
+              expect(err).to.not.exist
+
+              next()
+            })
+        },
+        function (next) {
+          authAgent
+            .get('/tickets/intervention')
+            .set('Cookie', cookie)
+            .end(function (err) {
+              expect(err).to.not.exist
+
+              next()
+            })
+        },
+        function (next) {
+          authAgent
+            .get('/tickets/development')
             .set('Cookie', cookie)
             .end(function (err) {
               expect(err).to.not.exist

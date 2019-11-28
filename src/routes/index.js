@@ -139,14 +139,70 @@ function mainRoutes(router, middleware, controllers) {
         controllers.tickets.processor
     )
     router.get(
-        '/tickets/pending',
+        '/tickets/waitingforinfo',
         middleware.redirectToLogin,
         middleware.loadCommonData,
         controllers.tickets.getByStatus,
         controllers.tickets.processor
     )
     router.get(
-        '/tickets/pending/page/:page',
+        '/tickets/waitingforinfo/page/:page',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/2ndline',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/2ndline/page/:page',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/planning',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/planning/page/:page',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/intervention',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/intervention/page/:page',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/development',
+        middleware.redirectToLogin,
+        middleware.loadCommonData,
+        controllers.tickets.getByStatus,
+        controllers.tickets.processor
+    )
+    router.get(
+        '/tickets/development/page/:page',
         middleware.redirectToLogin,
         middleware.loadCommonData,
         controllers.tickets.getByStatus,

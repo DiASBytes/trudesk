@@ -238,8 +238,9 @@
     width: 160px;
 }
 .uk-dropdown.uk-dropdown-xsmall {
-    min-width: 130px !important;
-    width: 130px !important;
+    background: green;
+    min-width: 150px !important;
+    width: 150px !important;
     padding: 5px 15px !important;
 }
 .uk-dropdown > ul > li > a {

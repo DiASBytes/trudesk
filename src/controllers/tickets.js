@@ -107,11 +107,23 @@ ticketsController.getByStatus = function (req, res, next) {
         case 'open':
             s = 1
             break
-        case 'pending':
+        case 'development':
             s = 2
             break
         case 'closed':
             s = 3
+            break
+        case 'waitingforinfo':
+            s = 4
+            break
+        case '2ndline':
+            s = 5
+            break
+        case 'planning':
+            s = 6
+            break
+        case 'intervention':
+            s = 7
             break
     }
 
