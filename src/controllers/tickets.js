@@ -146,6 +146,47 @@ ticketsController.getActive = function (req, res, next) {
     var page = req.params.page
     if (_.isUndefined(page)) page = 0
 
+    var queryString = req.query
+    var uid = queryString.uid
+    var subject = queryString.fs
+    var issue = queryString.it
+    var dateStart = queryString.ds
+    var dateEnd = queryString.de
+    var status = queryString.st
+    var priority = queryString.pr
+    var groups = queryString.gp
+    var types = queryString.tt
+    var tags = queryString.tag
+    var assignee = queryString.au
+
+    var rawNoPage = req.originalUrl
+        .replace(new RegExp('[?&]page=[^&#]*(#.*)?$'), '$1')
+        .replace(new RegExp('([?&])page=[^&]*&'), '$1')
+
+    if (!_.isUndefined(status) && !_.isArray(status)) status = [status]
+    if (!_.isUndefined(priority) && !_.isArray(priority)) priority = [priority]
+    if (!_.isUndefined(groups) && !_.isArray(groups)) groups = [groups]
+    if (!_.isUndefined(types) && !_.isArray(types)) types = [types]
+    if (!_.isUndefined(tags) && !_.isArray(tags)) tags = [tags]
+    if (!_.isUndefined(assignee) && !_.isArray(assignee)) assignee = [assignee]
+
+    var filter = {
+        uid: uid,
+        subject: subject,
+        issue: issue,
+        date: {
+            start: dateStart,
+            end: dateEnd
+        },
+        status: status,
+        priority: priority,
+        groups: groups,
+        tags: tags,
+        types: types,
+        assignee: assignee,
+        raw: rawNoPage
+    }
+
     var processor = {}
     processor.title = 'Tickets'
     processor.nav = 'tickets'
@@ -155,7 +196,8 @@ ticketsController.getActive = function (req, res, next) {
     processor.object = {
         limit: 50,
         page: page,
-        status: [0, 1, 2, 4, 5, 6, 7]
+        status: filter.status ? filter.status : [0, 1, 2, 4, 5, 6, 7],
+        filter: filter
     }
 
     req.processor = processor
@@ -386,6 +428,16 @@ ticketsController.processor = function (req, res) {
                 content.data.pagination.nextEnabled = object.page * object.limit + object.limit <= content.data.pagination.total
                 content.data.user = req.user
 
+                content.data.filterEnabled = false
+
+                if(content.data.filter) {
+                    if(content.data.filter.status || content.data.filter.priority || 
+                        content.data.filter.groups || content.data.filter.types || content.data.filter.tags) {
+                            content.data.filterEnabled = true
+                        }
+                }
+
+                // NOTE: render page
                 res.render(processor.renderpage, content)
             })
         }

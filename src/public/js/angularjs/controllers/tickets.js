@@ -524,22 +524,35 @@ define([
         })
 
         openFilterTicketWindow.closeWindow()
+
         History.pushState(
           null,
           null,
-          '/tickets/filter/' + querystring + '&r=' + Math.floor(Math.random() * (99999 - 1 + 1)) + 1
+          '/tickets' + querystring + '&r=' + Math.floor(Math.random() * (99999 - 1 + 1)) + 1
         )
       }
 
       $scope.clearFilterForm = function (e) {
-        $(':input', '#ticketFilterForm')
-          .not(':button, :submit, :reset, :hidden')
+        e.preventDefault()
+
+        var status = $('#filterStatus')[0].selectize;
+        status.clear();
+
+        $('#ticketFilterForm input')
           .val('')
+
         $('#ticketFilterForm')
           .find('option:selected')
           .removeAttr('selected')
           .trigger('chosen:updated')
-        e.preventDefault()
+
+        openFilterTicketWindow.closeWindow()
+        
+        History.pushState(
+          null,
+          null,
+          '/tickets'
+        )
       }
 
       function clearChecked () {

@@ -29,7 +29,22 @@ class NavButton extends Component {
     Helpers.UI.tetherUpdate()
   }
 
+  onClick = (href, text) => {
+    History.pushState(null, text, href + (window.location.search ? window.location.search : ''))
+  }
+
   renderAnchorLink () {
+    if(this.props.href === '/tickets') {
+      return (
+        <div onClick={(evt) => { this.onClick(this.props.href, this.props.text) }} >
+          <a className={this.props.class}>
+            <i className='material-icons'>{this.props.icon}</i>
+            {this.props.text}
+          </a>
+        </div>
+      )
+    }
+
     return (
       <a href={this.props.href} className={this.props.class}>
         <i className='material-icons'>{this.props.icon}</i>

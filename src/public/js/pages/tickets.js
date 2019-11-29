@@ -59,7 +59,7 @@ define('pages/tickets', [
                     return true
                 }
 
-                History.pushState(null, 'Ticket - ' + i, '/tickets/' + i)
+                History.pushState(null, 'Ticket - ' + i, '/tickets/' + i + (window.location.search ? window.location.search : ''))
             })
 
             // Overdue Tickets

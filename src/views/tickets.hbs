@@ -49,9 +49,16 @@
                             <!--<a href="#" class="btn md-btn-wave-light" style="border-radius: 3px; margin-right: 5px;"><i class="fa fa-large fa-search"></i></a>-->
                         <!--</li>-->
                         <li class="pagination">
-                            <a title="Ticket Filter" href="" class="btn no-ajaxy md-btn-wave-light" style="border-radius: 3px;" ng-click="openFilterTicketWindow($event)">
-                                <i class="fa fa-large fa-filter"></i>
-                            </a>
+                            {{#is data.filterEnabled true}}
+                                <a title="Ticket Filter" href="" class="btn no-ajaxy md-btn-wave-light filter-active" style="border-radius: 3px;" ng-click="openFilterTicketWindow($event)">
+                                    <i class="fa fa-large fa-filter"></i>
+                                </a>
+                            {{/is}}
+                            {{#is data.filterEnabled false}}
+                                <a title="Ticket Filter" href="" class="btn no-ajaxy md-btn-wave-light" style="border-radius: 3px;" ng-click="openFilterTicketWindow($event)">
+                                    <i class="fa fa-large fa-filter"></i>
+                                </a>
+                            {{/is}}
                         </li>
                     </ul>
                 </div>
