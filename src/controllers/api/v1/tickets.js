@@ -958,7 +958,13 @@ apiTickets.postComment = function (req, res) {
             marked.setOptions({
                 breaks: true
             })
-    
+            
+            if(owner === t.owner._id) {
+                t.status = 1
+            } else {
+                t.status = 4
+            }
+
             var Comment = {
                 owner: owner,
                 date: new Date(),

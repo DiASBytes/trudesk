@@ -701,6 +701,7 @@ define([
               if (commentMDE) {
                 commentMDE.value('')
               }
+              socket.ui.sendUpdateTicketStatus(id.val(), $scope.loggedInAccount._id === $('#__ownerId').text() ? 1 : 4)
             })
             .error(function (e) {
               $log.error('[trudesk:singleTicket:submitComment]')
