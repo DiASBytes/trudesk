@@ -17,3 +17,7 @@
 * Ability to upload all sorts of files to internal note field
 * Users are now able to change subject of ticket
 * Table date sort bugfix
+
+## [1.0.19] (2019-12-04)
+
+* Increate file upload size (25MB)
