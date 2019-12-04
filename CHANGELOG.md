@@ -11,3 +11,9 @@
 * Added statuses: waiting for info, 2nd line, planning & intervention
 * Automatically change status on events
 * Remember ticket filter
+
+## [1.0.18] (2019-12-04)
+
+* Ability to upload all sorts of files to internal note field
+* Users are now able to change subject of ticket
+* Table date sort bugfix
