@@ -243,6 +243,10 @@ define([
         }
       }
 
+      var allowedFileTypes = [
+        '*'
+      ];
+
       var $commentReply = $('#commentReply')
       var commentMDE = null
       if ($commentReply.length > 0) {
@@ -296,7 +300,7 @@ define([
             var text = this.editor.getValue() + ' ' + result
             this.editor.setValue(text)
           },
-          allowedTypes: ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'application/pdf'],
+          allowedTypes: allowedFileTypes,
           extraHeaders: {
             ticketid: $('#__ticketId').text()
           },
@@ -306,11 +310,11 @@ define([
           urlText: function(filename, result) {
             const extension = filename.split('.').pop();
             
-            if(extension === 'pdf') {
-              return '[' + result.original + '](' + filename + ')';
+            if(extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif') {
+              return '![Image](' + filename + ')';
             }
 
-            return '![Image](' + filename + ')';
+            return '[' + result.original + '](' + filename + ')';
           }
         })
 
@@ -348,18 +352,32 @@ define([
             }
             return false
           },
+          remoteFilename: function(file) {
+            if(file && file.name) {
+              return file.name;
+            }
+          },
           onFileUploadError: function (xhr) {
             var result = xhr.responseText
             var text = this.editor.getValue() + ' ' + result
             this.editor.setValue(text)
           },
+          allowedTypes: allowedFileTypes,
           extraHeaders: {
             ticketid: $('#__ticketId').text()
           },
           errorText: 'Error uploading file: ',
           uploadUrl: '/tickets/uploadmdeimage',
           jsonFieldName: 'filename',
-          urlText: '![Image]({filename})'
+          urlText: function(filename, result) {
+            const extension = filename.split('.').pop();
+            
+            if(extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif') {
+              return '![Image](' + filename + ')';
+            }
+
+            return '[' + result.original + '](' + filename + ')';
+          }
         })
 
         attachFileDesc($ticketNote)
