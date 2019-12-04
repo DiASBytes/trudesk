@@ -566,7 +566,7 @@ ticketsController.uploadImageMDE = function (req, res) {
         headers: req.headers,
         limits: {
             files: 1,
-            fileSize: 5 * 1024 * 1024 // 5mb limit
+            fileSize: 25 * 1024 * 1024 // 25mb limit
         }
     })
 
@@ -611,8 +611,6 @@ ticketsController.uploadImageMDE = function (req, res) {
         }
 
         file.on('limit', function () {
-            console.log("LIMIT");
-
             error = {
                 status: 500,
                 message: 'File too large'
