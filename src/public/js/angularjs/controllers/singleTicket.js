@@ -655,6 +655,41 @@ define([
           })
       }
 
+      $scope.editSubject = function (event) {
+        event.preventDefault()
+        var tagModal = $('#editSubjectModal')
+        if (tagModal.length > 0) {
+          UIkit.modal('#editSubjectModal', { bgclose: false }).show()
+        }
+      }
+
+      $scope.submitEditSubject = function (event) {
+        event.preventDefault()
+        var id = $('#__ticketId').text()
+        var form = $(event.target)
+        if (form.length < 1) return
+        var value = $(form).find('input').val();
+        if (value.length < 1) return;
+        $http
+          .put('/api/v1/tickets/' + id, {
+            subject: value
+          })
+          .success(function () {
+            helpers.UI.showSnackbar('Subject has been change', false)
+
+            $('h3.subject-text').text(value);
+            $('.issue-text h3').text('Re: ' + value);
+
+            UIkit.modal('#editSubjectModal').hide()
+          })
+          .error(function (e) {
+            $log.log('[trudesk:singleTicket:editSubjectTitle] - ', e)
+            helpers.UI.showSnackbar('Error: ' + e.error, true)
+
+            UIkit.modal('#editSubjectModal').hide()
+          })
+      }
+
       $scope.clearTags = function (event) {
         event.preventDefault()
         var id = $('#__ticketId').text()

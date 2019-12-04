@@ -312,6 +312,11 @@
                             </li>
                         </ul>
                     </div>
+                    <div class="page-change-subject uk-float-right">
+                        <a href="#" class="btn no-ajaxy" ng-click="editSubject($event)" data-uk-modal="{bgclose:false}">
+                            Edit subject
+                        </a>
+                    </div>
                 </div>
 
                 <div class="page-content-right full-height scrollable">
@@ -688,6 +693,25 @@
                         <div class="right" style="margin-top: 15px;">
                             <button class="uk-button uk-button-secondary cancel nomargin uk-modal-close" type="button">Cancel</button>
                             <button class="uk-button uk-button-success nomargin" type="submit">Save Tags</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="editSubjectModal" class="uk-modal" aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+            <div class="uk-modal-dialog uk-clearfix">
+                <a class="uk-modal-close uk-close no-ajaxy"></a>
+                <h5 style="font-weight: 300;">Edit subject</h5>
+                <div>
+                    <form id="editSubjectForm" action="#" method="POST" class="nomargin" ng-submit="submitEditSubject($event)">
+                        <div class="search-container">
+                            <input type="text" name="subject" id="subject" />
+                        </div>
+
+                        <div class="right" style="margin-top: 15px;">
+                            <button class="uk-button uk-button-secondary cancel nomargin uk-modal-close" type="button">Cancel</button>
+                            <button class="uk-button uk-button-success nomargin" type="submit">Submit</button>
                         </div>
                     </form>
                 </div>

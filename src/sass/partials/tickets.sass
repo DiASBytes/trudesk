@@ -130,6 +130,34 @@ div#accountsTable_wrapper
       margin-right: 8px
       font-size: 18px
 
+.page-change-subject
+  margin-right: 5px
+  .active > a,
+  .active > button
+    background: darken($page_content_title_bg, 5%)
+  a.btn,
+  button.btn,
+  button
+    background: darken($page_content_title_bg, 8%)
+    display: block
+    color: automatic-text-color(darken($page_content_title_bg, 8%))
+    font-family: $fontFamily
+    font-weight: 400
+    font-size: 12px
+    margin: 18px 5px 0 0
+    padding: 6px 16px
+    +borderRadius(3px)
+    height: 28px
+    line-height: 14px
+
+    &:hover
+      background: darken($page_content_title_bg, 12%)
+
+    i
+      font-weight: normal
+      margin-right: 10px
+      font-size: 14px
+
 .page-top-comments
   .active > a,
   .active > button
