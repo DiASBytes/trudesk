@@ -939,27 +939,27 @@ apiTickets.postComment = function (req, res) {
     var ticketId = commentJson._id
 
     if (_.isUndefined(ticketId)) return res.status(400).json({ success: false, error: 'Invalid Post Data' });
-    
+
     var userModel = require('../../../models/user')
-    
+
     userModel.findById(owner, function (err, user) {
         if (err) return res.status(400).json({ success: false, error: 'Invalid User' })
 
         var commentOwner = user.email;
 
         var ticketModel = require('../../../models/ticket')
-    
+
         ticketModel.getTicketById(ticketId, function (err, t) {
             if (err) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-    
+
             if (_.isUndefined(comment)) return res.status(400).json({ success: false, error: 'Invalid Post Data' })
-    
+
             var marked = require('marked')
             marked.setOptions({
                 breaks: true
             })
-            
-            if(owner === t.owner._id) {
+
+            if (owner === t.owner._id) {
                 t.status = 1
             } else {
                 t.status = 4
@@ -968,19 +968,19 @@ apiTickets.postComment = function (req, res) {
             var Comment = {
                 owner: owner,
                 date: new Date(),
-                comment: marked(comment).replace(/<img src/g, '<img style="max-width:650px" src').replace(/<a/g, '<a target="_blank"')
+                comment: marked(comment).replace(/<img src/g, '<img style="width:650px" src').replace(/<a/g, '<a target="_blank"')
             }
-    
-            if(user.htmlSignature && user.htmlSignature.length !== 0) {
+
+            if (user.htmlSignature && user.htmlSignature.length !== 0) {
                 Comment.comment += user.htmlSignature;
             }
 
             t.updated = Date.now()
-    
+
             t.comments.push(Comment)
-            
+
             t.needsAttention = !commentOwner.includes('diasbytes.com');
-            
+
             var HistoryItem = {
                 action: 'ticket:comment:added',
                 description: 'Comment was added',
@@ -988,17 +988,17 @@ apiTickets.postComment = function (req, res) {
             }
 
             t.history.push(HistoryItem)
-    
+
             t.save(function (err, tt) {
                 if (err) return res.status(400).json({ success: false, error: err.message })
-    
+
                 if (!permissions.canThis(req.user.role, 'tickets:notes')) {
                     tt.notes = []
                 }
-    
+
                 ticketModel.populate(tt, 'subscribers comments.owner', function (err) {
                     if (err) return res.json({ success: true, error: null, ticket: tt })
-    
+
                     if (tt.status === 0) {
                         tt.setStatus(tt.owner._id, {
                             status: 1
@@ -1012,7 +1012,7 @@ apiTickets.postComment = function (req, res) {
                     } else {
                         emitter.emit('ticket:comment:added', tt, Comment, req.headers.host)
                     }
-    
+
                     return res.json({ success: true, error: null, ticket: tt })
                 })
             })
