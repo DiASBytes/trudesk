@@ -1,6 +1,6 @@
 {
   "name": "support-tickets",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "private": true,
   "engines": {
     "node": ">=9.10.0"

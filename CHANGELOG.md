@@ -21,3 +21,7 @@
 ## [1.0.19] (2019-12-04)
 
 * Increate file upload size (25MB)
+
+## [1.0.20] (2019-12-05)
+
+* Fixed a bug ocurring in mailCheck when email is ticket reply
