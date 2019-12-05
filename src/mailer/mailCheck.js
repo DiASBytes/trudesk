@@ -281,22 +281,13 @@ function bindImapReady() {
                                                 if (isReply) {
                                                     const replyUid = isReply[0].substr(1);
                                                     winston.debug(`New email reply: ${replyUid}`);
-
-                                                    Ticket.getTicketByUid(replyUid, function (err, t) {
-                                                        if (!err) {
-                                                            message.reply = replyParser(mail.text, true);
-                                                            message.ticket = t;
-
-                                                            const msg = _.clone(message);
-                                                            mailCheck.messages.push(msg);
-                                                        } else {
-                                                            winston.debug("Reply email ticket not found");
-                                                        }
-                                                    });
+                                                    message.replyUid = replyUid;
                                                 } else {
-                                                    const msg = _.clone(message);
-                                                    mailCheck.messages.push(msg)
+                                                    message.replyUid = undefined;
                                                 }
+
+                                                const msg = _.clone(message);
+                                                mailCheck.messages.push(msg)
                                             })
                                         })
 
@@ -363,40 +354,63 @@ function handleMessages(messages) {
         ) {
             async.auto(
                 {
-                    handleUser: function (callback) {
-                        userSchema.getUserByEmail(message.from, function (err, user) {
-                            if (err) winston.warn(err)
-                            if (!err && user && !message.reply) {
-                                message.owner = user
-                                return callback(null, user)
-                            } else if (!err && user && message.reply) {
-                                message.replyUser = user;
-                                return callback(null, user);
-                            }
+                    handleReply: function (callback) {
+                        if (message.replyUid) {
+                            Ticket.getTicketByUid(message.replyUid, (err, t) => {
 
-                            // User doesn't exist. Lets create public user... If we want to
-                            if (mailCheck.fetchMailOptions.createAccount) {
-                                userSchema.createUserFromEmail(message.from, message.from, function (err, response) {
-                                    if (err) {
-                                        console.log(`Error creating user ${message.from}`, err);
-                                        return callback(err)
-                                    }
+                                if (!err && t && !t.deleted) {
 
-                                    if (!message.reply) {
-                                        message.owner = response.user
-                                        message.group = response.group
-                                    } else {
-                                        message.replyUser = response.user;
-                                        message.replyUserGroup = response.group;
-                                    }
-
-                                    return callback(null, response)
-                                })
-                            } else {
-                                return callback('No User found.')
-                            }
-                        })
+                                    message.reply = replyParser(message.body, true);
+                                    message.ticket = t;
+                                    callback(null, t);
+                                } else {
+                                    message.reply = undefined;
+                                    message.replyUid = undefined;
+                                    callback(null);
+                                    winston.debug("Reply email ticket not found");
+                                }
+                            });
+                        } else {
+                            callback(null);
+                        }
                     },
+                    handleUser: [
+                        'handleReply',
+                        function (results, callback) {
+                            userSchema.getUserByEmail(message.from, (err, user) => {
+                                if (err) winston.warn(err)
+                                if (!err && user && !message.reply) {
+                                    message.owner = user
+                                    return callback(null, user)
+                                } else if (!err && user && message.reply) {
+                                    message.replyUser = user;
+                                    return callback(null, user);
+                                }
+
+                                // User doesn't exist. Lets create public user... If we want to
+                                if (mailCheck.fetchMailOptions.createAccount) {
+                                    userSchema.createUserFromEmail(message.from, message.from, function (err, response) {
+                                        if (err) {
+                                            console.log(`Error creating user ${message.from}`, err);
+                                            return callback(err)
+                                        }
+
+                                        if (!message.reply) {
+                                            message.owner = response.user
+                                            message.group = response.group
+                                        } else {
+                                            message.replyUser = response.user;
+                                            message.replyUserGroup = response.group;
+                                        }
+
+                                        return callback(null, response)
+                                    })
+                                } else {
+                                    return callback('No User found.')
+                                }
+                            })
+                        }
+                    ],
                     handleGroup: [
                         'handleUser',
                         function (results, callback) {
