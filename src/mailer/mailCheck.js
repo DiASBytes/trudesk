@@ -357,12 +357,16 @@ function handleMessages(messages) {
                     handleReply: function (callback) {
                         if (message.replyUid) {
                             Ticket.getTicketByUid(message.replyUid, (err, t) => {
-                                if (!err) {
+
+                                if (!err && t && !t.deleted) {
+
                                     message.reply = replyParser(message.body, true);
                                     message.ticket = t;
                                     callback(null, t);
                                 } else {
-                                    callback(err, null);
+                                    message.reply = undefined;
+                                    message.replyUid = undefined;
+                                    callback(null);
                                     winston.debug("Reply email ticket not found");
                                 }
                             });
