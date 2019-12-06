@@ -25,3 +25,7 @@
 ## [1.0.20] (2019-12-05)
 
 * Fixed a bug ocurring in mailCheck when email is ticket reply
+
+## [1.0.21] (2019-12-06)
+
+* Added elastic search logging
