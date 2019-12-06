@@ -130,7 +130,10 @@ function bindImapError() {
 }
 
 function onImapReady() {
-    handleMessages(mailCheck.messages);
+    setTimeout(() => {
+        handleMessages(mailCheck.messages);
+    }, 5000);
+
     mailCheck.Imap.destroy();
 }
 
@@ -169,6 +172,7 @@ function buildAttMessageFunction(attachment, sqNumber) {
 
     return function (msg) {
         if (attachment.size < 5000) {
+            winston.debug('Skipping attachment: size < 5KB');
             return;
         }
 
@@ -184,6 +188,8 @@ function buildAttMessageFunction(attachment, sqNumber) {
                 if (message) {
                     if (!message.attachments)
                         message.attachments = [];
+
+                    winston.debug(`Added attachment: ${filename}`);
 
                     message.attachments.push({
                         filename: filename,
@@ -220,11 +226,11 @@ function bindImapReady() {
                             },
                             function (results, next) {
                                 if (_.size(results) < 1) {
-                                    winston.debug('MailCheck: Nothing to Fetch.')
+                                    winston.info('MailCheck: Nothing to Fetch.')
                                     return next()
                                 }
 
-                                winston.debug('Processed %s Mail > Ticket', _.size(results))
+                                winston.debug(`Processing ${_.size(results)} Mail > Ticket`)
 
                                 var flag = '\\Seen'
                                 if (mailCheck.fetchMailOptions.deleteMessage) {
@@ -252,7 +258,11 @@ function bindImapReady() {
 
                                         stream.once('end', function () {
                                             simpleParser(buffer, function (err, mail) {
-                                                if (err) winston.warn(err)
+                                                if (err) {
+                                                    winston.error(err);
+                                                }
+
+                                                winston.debug(`Parsing: ${mail.subject}`);
 
                                                 if (sqNumber) {
                                                     message.sqNumber = sqNumber
@@ -261,6 +271,7 @@ function bindImapReady() {
                                                 if (mail.headers.has('from')) {
                                                     message.from = mail.headers.get('from').value[0].address
                                                 }
+
 
                                                 if (mail.subject) {
                                                     message.subject = mail.subject
@@ -287,7 +298,8 @@ function bindImapReady() {
                                                 }
 
                                                 const msg = _.clone(message);
-                                                mailCheck.messages.push(msg)
+                                                mailCheck.messages.push(msg);
+                                                winston.debug('Message', { msg });
                                             })
                                         })
 
@@ -318,7 +330,9 @@ function bindImapReady() {
                             }
                         ],
                         function (err) {
-                            if (err) winston.warn(err)
+                            if (err) {
+                                winston.error(err);
+                            }
                             onImapReady();
                         }
                     )
@@ -326,7 +340,7 @@ function bindImapReady() {
             })
         })
     } catch (error) {
-        winston.warn(error)
+        winston.error(error);
         onImapReady();
     }
 }
@@ -342,8 +356,8 @@ mailCheck.fetchMail = function () {
 }
 
 function handleMessages(messages) {
-
     messages.forEach(function (message) {
+        winston.debug('Handling message', message);
         if (
             !_.isUndefined(message.from) &&
             !_.isEmpty(message.from) &&
@@ -356,18 +370,18 @@ function handleMessages(messages) {
                 {
                     handleReply: function (callback) {
                         if (message.replyUid) {
+                            winston.debug('Message is reply');
                             Ticket.getTicketByUid(message.replyUid, (err, t) => {
-
                                 if (!err && t && !t.deleted) {
-
+                                    winston.debug('Reply email ticket found');
                                     message.reply = replyParser(message.body, true);
                                     message.ticket = t;
                                     callback(null, t);
                                 } else {
+                                    winston.debug("Reply email ticket not found");
                                     message.reply = undefined;
                                     message.replyUid = undefined;
                                     callback(null);
-                                    winston.debug("Reply email ticket not found");
                                 }
                             });
                         } else {
@@ -378,7 +392,7 @@ function handleMessages(messages) {
                         'handleReply',
                         function (results, callback) {
                             userSchema.getUserByEmail(message.from, (err, user) => {
-                                if (err) winston.warn(err)
+                                if (err) winston.error(err)
                                 if (!err && user && !message.reply) {
                                     message.owner = user
                                     return callback(null, user)
@@ -389,9 +403,10 @@ function handleMessages(messages) {
 
                                 // User doesn't exist. Lets create public user... If we want to
                                 if (mailCheck.fetchMailOptions.createAccount) {
+                                    winston.debug(`No user found: creating ${message.from}`);
                                     userSchema.createUserFromEmail(message.from, message.from, function (err, response) {
                                         if (err) {
-                                            console.log(`Error creating user ${message.from}`, err);
+                                            winston.error(err);
                                             return callback(err)
                                         }
 
@@ -419,7 +434,10 @@ function handleMessages(messages) {
                             }
 
                             groupSchema.getAllGroupsOfUser(message.owner._id, function (err, group) {
-                                if (err) return callback(err)
+                                if (err) {
+                                    winston.error(err);
+                                    return callback(err)
+                                }
                                 if (!group) return callback('Unknown group for user: ' + message.owner.email)
 
                                 if (_.isArray(group)) {
@@ -476,6 +494,11 @@ function handleMessages(messages) {
                         'handlePriority',
                         function (results, callback) {
                             if (!message.reply || !message.ticket) {
+                                winston.debug(`Creating ticket`, {
+                                    subject: message.subject,
+                                    owner: message.owner,
+                                    group: message.group
+                                });
                                 var HistoryItem = {
                                     action: 'ticket:created',
                                     description: 'Ticket was created.',
@@ -497,7 +520,7 @@ function handleMessages(messages) {
                                     },
                                     function (err, ticket) {
                                         if (err) {
-                                            winston.warn('Failed to create ticket from email: ' + err)
+                                            winston.error(err);
                                             return callback(err)
                                         }
 
@@ -507,14 +530,13 @@ function handleMessages(messages) {
                                         })
 
                                         if (message.attachments && message.attachments.length > 0) {
+                                            winston.debug(`Message has attachments`);
                                             const attachments = [];
 
                                             const publicPath = path.join(__dirname, '../../public/');
 
                                             if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
                                                 fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
-
-
 
                                             for (var i = 0; i < message.attachments.length; i++) {
                                                 try {
@@ -529,14 +551,14 @@ function handleMessages(messages) {
                                                         type: isImage ? 'image' : `.${ext}`
                                                     })
                                                 } catch (e) {
-                                                    console.log('Error renaming attachment', e);
+                                                    winston.error(e);
                                                 }
                                             }
 
                                             ticket.addAttachments(ticket._id, attachments, function () {
                                                 ticket.save(function (err, t) {
                                                     if (err) {
-                                                        winston.debug("Attachement add failed!");
+                                                        winston.debug("Adding attachments failed!");
                                                     } else {
                                                         callback();
                                                     }
@@ -547,13 +569,13 @@ function handleMessages(messages) {
                                 )
                             } else {
                                 message.ticket.addComment(message.replyUser.id, message.reply, function () {
-                                    winston.debug(`Added comment to ticket ${message.ticket.uid}`);
+                                    winston.debug(`Adding comment to ticket ${message.ticket.uid}`);
 
                                     message.ticket.needsAttention = !message.replyUser.email.includes('diasbytes.com');
 
                                     message.ticket.save(function (err, ticket) {
                                         if (err) {
-                                            winston.debug(`Error saving ticket`, err);
+                                            winston.error(err);
                                             return;
                                         }
 
@@ -583,7 +605,7 @@ function handleMessages(messages) {
                                                     ticket.addAttachmentsToComment(ticket._id, attachments, function () {
                                                         ticket.save(function (err, t) {
                                                             if (err) {
-                                                                winston.debug("Comment add failed!");
+                                                                winston.debug("Adding attachments failed!");
                                                             } else {
                                                                 callback();
                                                             }
@@ -600,7 +622,7 @@ function handleMessages(messages) {
                 },
                 function (err) {
                     if (err) {
-                        winston.debug(err)
+                        winston.error(err)
                     }
                 }
             )

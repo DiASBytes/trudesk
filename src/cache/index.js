@@ -31,9 +31,9 @@ var cache
 
 global.env = process.env.NODE_ENV || 'production'
 
-winston.setLevels(winston.config.cli.levels)
+// winston.setLevels(winston.config.cli.levels)
 winston.remove(winston.transports.Console)
-winston.add(winston.transports.Console, {
+winston.add(new winston.transports.Console, ({
     colorize: true,
     timestamp: function () {
         var date = new Date()
@@ -50,7 +50,7 @@ winston.add(winston.transports.Console, {
         )
     },
     level: global.env === 'production' ? 'info' : 'verbose'
-})
+}))
 
 function loadConfig() {
     nconf.file({

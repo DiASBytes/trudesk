@@ -19,6 +19,8 @@ var nconf = require('nconf')
 var pkg = require('./package.json')
 var ws = require('./src/webserver')
 var schedule = require('node-schedule')
+var elasticSearch = require('winston-elasticsearch');
+var elasticClient = require('./src/elastic');
 // `var memory = require('./src/memory');
 
 var mailReport = require('./src/mailer/mailReport')
@@ -32,10 +34,11 @@ nconf.argv().env()
 global.env = process.env.NODE_ENV || 'development'
 // global.env = process.env.NODE_ENV || 'production';
 
-winston.setLevels(winston.config.cli.levels)
+// winston.setLevels(winston.config.cli.levels)
 winston.remove(winston.transports.Console)
-winston.add(winston.transports.Console, {
+winston.add(new winston.transports.Console({
     colorize: true,
+    json: false,
     timestamp: function () {
         var date = new Date()
         return (
@@ -50,13 +53,46 @@ winston.add(winston.transports.Console, {
             ']'
         )
     },
-    level: global.env === 'production' ? 'info' : 'verbose'
-})
+    format: winston.format.combine(
+        winston.format.printf(info => `${info.message}`)
+    ),
+    level: global.env === 'production' ? 'info' : 'debug'
+}))
 
-winston.add(winston.transports.File, {
+winston.add(new winston.transports.File({
     filename: 'logs/error.log',
     level: 'error'
+}))
+
+const debugFilter = winston.format((info, opts) => {
+    return info.level === 'debug' ? info : false
 })
+
+winston.add(new elasticSearch({
+    level: 'debug',
+    indexPrefix: 'support-debug',
+    ensureMappingTemplate: false,
+    json: true,
+    format: winston.format.combine(
+        debugFilter()
+    ),
+    client: elasticClient
+}))
+
+const errorFilter = winston.format((info, opts) => {
+    return info.level === 'error' ? info : false
+})
+
+winston.add(new elasticSearch({
+    level: 'error',
+    indexPrefix: 'support-error',
+    ensureMappingTemplate: false,
+    json: true,
+    format: winston.format.combine(
+        errorFilter()
+    ),
+    client: elasticClient
+}))
 
 winston.err = function (err) {
     winston.error(err.stack)
@@ -64,8 +100,6 @@ winston.err = function (err) {
 
 process.on('message', function (msg) {
     if (msg === 'shutdown') {
-        winston.debug('Closing all connections...')
-
         if (ws.server) {
             ws.server.close()
         }
@@ -169,7 +203,7 @@ function launchServer(db) {
                                 if (err) return next(err)
 
                                 var mailCheck = require('./src/mailer/mailCheck')
-                                winston.debug('Starting MailCheck...')
+                                winston.info('Starting MailCheck...')
                                 mailCheck.init(settings)
 
                                 return next()
@@ -183,7 +217,6 @@ function launchServer(db) {
                     require('./src/migration').run(next)
                 },
                 function (next) {
-                    winston.debug('Building dynamic sass...')
                     require('./src/sass/buildsass').build(next)
                 },
                 // function (next) {

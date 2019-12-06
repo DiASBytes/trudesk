@@ -171,7 +171,7 @@ var notifications = require('../notifications') // Load Push Events
             var message = data.message
 
             if (!tpsEnabled || !tpsUsername || !tpsApiKey) {
-                winston.debug('Warn: TPS - Push Service Not Enabled')
+                winston.info('Warn: TPS - Push Service Not Enabled')
                 return
             }
 
@@ -424,7 +424,7 @@ var notifications = require('../notifications') // Load Push Events
 
                                         let comments = _.sortBy(t.comments, function (o) { return moment(o.date); }).reverse()
 
-                                        const formattedComments = comments.reduce(function(arr, comment) {
+                                        const formattedComments = comments.reduce(function (arr, comment) {
                                             var c = {
                                                 owner: comment.owner,
                                                 comment: comment.comment,
