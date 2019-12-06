@@ -56,7 +56,7 @@ winston.add(new winston.transports.Console({
     format: winston.format.combine(
         winston.format.printf(info => `${info.message}`)
     ),
-    level: global.env === 'production' ? 'info' : 'verbose'
+    level: global.env === 'production' ? 'info' : 'debug'
 }))
 
 winston.add(new winston.transports.File({
