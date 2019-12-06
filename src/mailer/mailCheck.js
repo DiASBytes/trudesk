@@ -220,7 +220,7 @@ function bindImapReady() {
                             },
                             function (results, next) {
                                 if (_.size(results) < 1) {
-                                    winston.debug('MailCheck: Nothing to Fetch.')
+                                    winston.info('MailCheck: Nothing to Fetch.')
                                     return next()
                                 }
 

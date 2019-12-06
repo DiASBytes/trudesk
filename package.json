@@ -20,6 +20,7 @@
     "snyk-protect": "snyk protect"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "7.5.0",
     "adm-zip": "0.4.13",
     "ansi_up": "3.0.0",
     "archiver": "3.0.0",
@@ -109,7 +110,8 @@
     "unzipper": "0.9.10",
     "util": "0.11.1",
     "velocity-react": "1.4.1",
-    "winston": "2.4.4"
+    "winston": "3.2.1",
+    "winston-elasticsearch": "0.8.2"
   },
   "devDependencies": {
     "@babel/core": "7.2.2",

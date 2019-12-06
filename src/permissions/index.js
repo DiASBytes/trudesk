@@ -18,20 +18,20 @@ var roleSchema = require('../models/role')
 var roleOrder = require('../models/roleorder')
 
 var register = function (callback) {
-  // Register Roles
-  roleSchema.getRoles(function (err, roles) {
-    if (err) return callback(err)
+    // Register Roles
+    roleSchema.getRoles(function (err, roles) {
+        if (err) return callback(err)
 
-    roleOrder.getOrder(function (err, ro) {
-      if (err) return callback(err)
+        roleOrder.getOrder(function (err, ro) {
+            if (err) return callback(err)
 
-      winston.debug('Registering Permissions...')
-      global.roleOrder = ro
-      global.roles = roles
+            //   winston.debug('Registering Permissions...')
+            global.roleOrder = ro
+            global.roles = roles
 
-      return callback()
+            return callback()
+        })
     })
-  })
 }
 
 /***
@@ -43,150 +43,150 @@ var register = function (callback) {
  */
 
 var canThis = function (role, a, adminOverride) {
-  if (_.isUndefined(role)) return false
-  if (adminOverride === true && role.isAdmin) return true
+    if (_.isUndefined(role)) return false
+    if (adminOverride === true && role.isAdmin) return true
 
-  var roles = global.roles
-  if (_.isUndefined(roles)) return false
-  if (_.hasIn(role, '_id')) role = role._id
-  var rolePerm = _.find(roles, { _id: role })
-  if (_.isUndefined(rolePerm)) return false
-  if (_.indexOf(rolePerm.grants, '*') !== -1) return true
+    var roles = global.roles
+    if (_.isUndefined(roles)) return false
+    if (_.hasIn(role, '_id')) role = role._id
+    var rolePerm = _.find(roles, { _id: role })
+    if (_.isUndefined(rolePerm)) return false
+    if (_.indexOf(rolePerm.grants, '*') !== -1) return true
 
-  var actionType = a.split(':')[0]
-  var action = a.split(':')[1]
+    var actionType = a.split(':')[0]
+    var action = a.split(':')[1]
 
-  if (_.isUndefined(actionType) || _.isUndefined(action)) return false
+    if (_.isUndefined(actionType) || _.isUndefined(action)) return false
 
-  var result = _.filter(rolePerm.grants, function (value) {
-    if (_.startsWith(value, actionType + ':')) return value
-  })
-
-  if (_.isUndefined(result) || _.size(result) < 1) return false
-  if (_.size(result) === 1) {
-    if (result[0] === '*') return true
-  }
-
-  var typePerm = result[0].split(':')[1].split(' ')
-  typePerm = _.uniq(typePerm)
-
-  if (_.indexOf(typePerm, '*') !== -1) return true
-
-  return _.indexOf(typePerm, action) !== -1
-}
-
-var getRoles = function (action) {
-  if (_.isUndefined(action)) return false
-
-  var rolesWithAction = []
-  var roles = global.roles
-  if (_.isUndefined(roles)) return []
-
-  _.each(roles, function (role) {
-    var actionType = action.split(':')[0]
-    var theAction = action.split(':')[1]
-
-    if (_.isUndefined(actionType) || _.isUndefined(theAction)) return
-    if (_.indexOf(role.grants, '*') !== -1) {
-      rolesWithAction.push(role)
-      return
-    }
-
-    var result = _.filter(role.grants, function (value) {
-      if (_.startsWith(value, actionType + ':')) return value
+    var result = _.filter(rolePerm.grants, function (value) {
+        if (_.startsWith(value, actionType + ':')) return value
     })
 
-    if (_.isUndefined(result) || _.size(result) < 1) return
+    if (_.isUndefined(result) || _.size(result) < 1) return false
     if (_.size(result) === 1) {
-      if (result[0] === '*') {
-        rolesWithAction.push(role)
-        return
-      }
+        if (result[0] === '*') return true
     }
 
     var typePerm = result[0].split(':')[1].split(' ')
     typePerm = _.uniq(typePerm)
 
-    if (_.indexOf(typePerm, '*') !== -1) {
-      rolesWithAction.push(role)
-      return
-    }
+    if (_.indexOf(typePerm, '*') !== -1) return true
 
-    if (_.indexOf(typePerm, theAction) !== -1) {
-      rolesWithAction.push(role)
-    }
-  })
-
-  rolesWithAction = _.uniq(rolesWithAction)
-
-  return rolesWithAction
+    return _.indexOf(typePerm, action) !== -1
 }
 
-function hasHierarchyEnabled (roleId) {
-  var role = _.find(global.roles, function (o) {
-    return o._id.toString() === roleId.toString()
-  })
-  if (_.isUndefined(role) || _.isUndefined(role.hierarchy)) return true
-  return role.hierarchy
+var getRoles = function (action) {
+    if (_.isUndefined(action)) return false
+
+    var rolesWithAction = []
+    var roles = global.roles
+    if (_.isUndefined(roles)) return []
+
+    _.each(roles, function (role) {
+        var actionType = action.split(':')[0]
+        var theAction = action.split(':')[1]
+
+        if (_.isUndefined(actionType) || _.isUndefined(theAction)) return
+        if (_.indexOf(role.grants, '*') !== -1) {
+            rolesWithAction.push(role)
+            return
+        }
+
+        var result = _.filter(role.grants, function (value) {
+            if (_.startsWith(value, actionType + ':')) return value
+        })
+
+        if (_.isUndefined(result) || _.size(result) < 1) return
+        if (_.size(result) === 1) {
+            if (result[0] === '*') {
+                rolesWithAction.push(role)
+                return
+            }
+        }
+
+        var typePerm = result[0].split(':')[1].split(' ')
+        typePerm = _.uniq(typePerm)
+
+        if (_.indexOf(typePerm, '*') !== -1) {
+            rolesWithAction.push(role)
+            return
+        }
+
+        if (_.indexOf(typePerm, theAction) !== -1) {
+            rolesWithAction.push(role)
+        }
+    })
+
+    rolesWithAction = _.uniq(rolesWithAction)
+
+    return rolesWithAction
 }
 
-function parseRoleHierarchy (roleId) {
-  var roleOrder = global.roleOrder.order
-
-  var idx = _.findIndex(roleOrder, function (i) {
-    return i.toString() === roleId.toString()
-  })
-  if (idx === -1) return []
-
-  return _.slice(roleOrder, idx)
+function hasHierarchyEnabled(roleId) {
+    var role = _.find(global.roles, function (o) {
+        return o._id.toString() === roleId.toString()
+    })
+    if (_.isUndefined(role) || _.isUndefined(role.hierarchy)) return true
+    return role.hierarchy
 }
 
-function hasPermOverRole (ownRole, extRole) {
-  var roles = parseRoleHierarchy(extRole)
+function parseRoleHierarchy(roleId) {
+    var roleOrder = global.roleOrder.order
 
-  var i = _.find(roles, function (o) {
-    return o.toString() === ownRole.toString()
-  })
+    var idx = _.findIndex(roleOrder, function (i) {
+        return i.toString() === roleId.toString()
+    })
+    if (idx === -1) return []
 
-  return !_.isUndefined(i)
+    return _.slice(roleOrder, idx)
 }
 
-function isAdmin (roleId, callback) {
-  roleSchema.get(roleId, function (err, role) {
-    if (err) return callback(false)
+function hasPermOverRole(ownRole, extRole) {
+    var roles = parseRoleHierarchy(extRole)
 
-    return callback(role.isAdmin)
-  })
+    var i = _.find(roles, function (o) {
+        return o.toString() === ownRole.toString()
+    })
+
+    return !_.isUndefined(i)
 }
 
-function isAdminSync (roleId) {
-  var roles = global.roles
-  if (!roles) return false
-  var role = _.find(roles, function (r) {
-    return r._id.toString() === roleId.toString()
-  })
+function isAdmin(roleId, callback) {
+    roleSchema.get(roleId, function (err, role) {
+        if (err) return callback(false)
 
-  if (!role) return false
-
-  return role.isAdmin
+        return callback(role.isAdmin)
+    })
 }
 
-function buildGrants (obj) {
-  return _.map(obj, function (v, k) {
-    return k + ':' + _.join(v, ' ')
-  })
+function isAdminSync(roleId) {
+    var roles = global.roles
+    if (!roles) return false
+    var role = _.find(roles, function (r) {
+        return r._id.toString() === roleId.toString()
+    })
+
+    if (!role) return false
+
+    return role.isAdmin
+}
+
+function buildGrants(obj) {
+    return _.map(obj, function (v, k) {
+        return k + ':' + _.join(v, ' ')
+    })
 }
 
 module.exports = {
-  register: register,
-  flustRoles: register,
-  canThis: canThis,
-  hasHierarchyEnabled: hasHierarchyEnabled,
-  parseRoleHierarchy: parseRoleHierarchy,
-  hasPermOverRole: hasPermOverRole,
+    register: register,
+    flustRoles: register,
+    canThis: canThis,
+    hasHierarchyEnabled: hasHierarchyEnabled,
+    parseRoleHierarchy: parseRoleHierarchy,
+    hasPermOverRole: hasPermOverRole,
 
-  getRoles: getRoles,
-  isAdmin: isAdmin,
-  isAdminSync: isAdminSync,
-  buildGrants: buildGrants
+    getRoles: getRoles,
+    isAdmin: isAdmin,
+    isAdminSync: isAdminSync,
+    buildGrants: buildGrants
 }
