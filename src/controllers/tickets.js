@@ -86,7 +86,7 @@ ticketsController.getByStatus = function (req, res, next) {
     processor.renderpage = 'tickets'
     processor.pagetype = 'active'
     processor.object = {
-        limit: 50,
+        limit: 100,
         page: page,
         status: []
     }
@@ -194,7 +194,7 @@ ticketsController.getActive = function (req, res, next) {
     processor.renderpage = 'tickets'
     processor.pagetype = 'active'
     processor.object = {
-        limit: 50,
+        limit: 100,
         page: page,
         status: filter.status ? filter.status : [0, 1, 2, 4, 5, 6, 7],
         filter: filter
@@ -224,7 +224,7 @@ ticketsController.getAssigned = function (req, res, next) {
     processor.renderpage = 'tickets'
     processor.pagetype = 'assigned'
     processor.object = {
-        limit: 50,
+        limit: 100,
         page: page,
         status: [0, 1, 2],
         assignedSelf: true,
@@ -255,7 +255,7 @@ ticketsController.getUnassigned = function (req, res, next) {
     processor.renderpage = 'tickets'
     processor.pagetype = 'unassigned'
     processor.object = {
-        limit: 50,
+        limit: 100,
         page: page,
         status: [0, 1, 2],
         unassigned: true,
@@ -318,7 +318,7 @@ ticketsController.filter = function (req, res, next) {
     processor.renderpage = 'tickets'
     processor.pagetype = 'filter'
     processor.object = {
-        limit: 50,
+        limit: 100,
         page: page,
         status: filter.status,
         user: req.user._id,
