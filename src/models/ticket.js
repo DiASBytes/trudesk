@@ -472,6 +472,10 @@ ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
 
     self.comments.push(Comment)
 
+    if (self.owner.id === ownerId) {
+        self.status = 1;
+    }
+
     var HistoryItem = {
         action: 'ticket:comment:added',
         description: 'Comment was added',
