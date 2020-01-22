@@ -66,6 +66,7 @@ var COLLECTION = 'tickets'
  * @property {Array} attachments An Array of {@link Attachment} items
  * @property {Array} history An array of {@link History} items
  * @property {Array} subscribers An array of user _ids that receive notifications on ticket changes.
+ * @property {String} origin ```Required``` The origin of the ticket. (Overview)
  */
 var ticketSchema = mongoose.Schema({
     uid: { type: Number, unique: true, index: true },
@@ -106,7 +107,8 @@ var ticketSchema = mongoose.Schema({
     notes: [noteSchema],
     attachments: [attachmentSchema],
     history: [historySchema],
-    subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'accounts' }]
+    subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'accounts' }],
+    origin: { type: String },
 })
 
 ticketSchema.index({ deleted: -1, group: 1, status: 1 })

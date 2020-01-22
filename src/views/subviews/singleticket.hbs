@@ -120,6 +120,11 @@
                 </div>
                 <div class="page-content-left full-height scrollable">
                     <div class="ticket-details-wrap uk-clearfix">
+                        {{#if data.ticket.origin}} 
+                            <div class="ticket-origin">
+                                <p>Origin <span>{{data.ticket.origin}}</span></p>
+                            </div>
+                        {{/if}}
                         <div class="ticket-assignee-wrap uk-clearfix" style="padding-right: 30px;">
                             <h4>Assignee</h4>
                             {{#if data.ticket.assignee}}

@@ -523,7 +523,8 @@ function handleMessages(messages) {
                                         issue: message.body,
                                         history: [HistoryItem],
                                         subscribers: [message.owner._id],
-                                        needsAttention: !message.owner.email.includes('diasbytes.com')
+                                        needsAttention: !message.owner.email.includes('diasbytes.com'),
+                                        origin: 'Mail'
                                     },
                                     function (err, ticket) {
                                         if (err) {
