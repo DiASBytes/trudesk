@@ -1,14 +1,12 @@
 require('dotenv').config()
 
-var path = require('path')
-var mailer = require('./')
 var axios = require('axios')
 var moment = require('moment')
-var Email = require('email-templates')
-var templateDir = path.resolve(__dirname, '..', 'mailer', 'templates')
 var settings = require('../models/setting')
+var mailJet = require('./mailJet')
 
 var { TRUDESK_ACCESS_TOKEN, APPLICATION_URL } = process.env;
+
 var mailReport = {}
 
 mailReport.send = function () {
@@ -31,48 +29,15 @@ mailReport.send = function () {
                     },
                     method: 'POST',
                     data: {
-                        startDate: moment().subtract(1, "weeks").format('MM-DD-YYYY'),
+                        startDate: moment().subtract(10, "weeks").format('MM-DD-YYYY'),
                         endDate: moment().format('MM-DD-YYYY'),
                         groups: ['-1'],
-                        status: ['0', '1', '2', '3']
+                        status: ['0', '1', '2']
                     }
                 })
                     .then(function (response) {
                         if (response && response.data) {
-                            var email = new Email({
-                                views: {
-                                    root: templateDir,
-                                    options: {
-                                        extension: 'handlebars'
-                                    }
-                                }
-                            })
-
-                            email
-                                .render('weekly-report')
-                                .then(function (html) {
-                                    var mailOptions = {
-                                        to: emails.value,
-                                        subject: 'Weekly report',
-                                        html: html,
-                                        generateTextFromHTML: true,
-                                        attachments: [
-                                            {
-                                                filename: 'report.csv',
-                                                content: response.data
-                                            }
-                                        ]
-                                    }
-
-                                    mailer.sendMail(mailOptions, function (err) {
-                                        if (err) {
-                                            console.log('err', err);
-                                        }
-                                    })
-                                })
-                                .catch(function (err) {
-                                    console.log('err', err);
-                                });
+                            mailJet.sendWeeklyReport(emails.value, response.data);
                         }
                     })
                     .catch(function (error) {

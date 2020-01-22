@@ -1,5 +1,6 @@
 const config = require('../../config/config');
 const mailjet = require('node-mailjet').connect(config.mailjet.public, config.mailjet.private);
+const base64 = require('base-64');
 
 module.exports = {
     sendTicketCreated: (ticket) => {
@@ -135,6 +136,39 @@ module.exports = {
                                 "ticket": ticket,
                                 "data": billingData
                             }
+                        }
+                    ]
+                });
+
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    },
+    sendWeeklyReport: (emails, content) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const respondents = emails.split(',').map((email) => ({
+                    "Email": email
+                }));
+
+                await mailjet.post('send', { 'version': 'v3.1' }).request({
+                    "Messages": [
+                        {
+                            "From": {
+                                "Email": config.mailjet.fromEmail,
+                                "Name": 'DiASBytes Support'
+                            },
+                            "To": respondents,
+                            "TemplateID": 1190514,
+                            "TemplateLanguage": true,
+                            "Subject": `Weekly report`,
+                            "Attachments": [{
+                                "Filename": "report.csv",
+                                "ContentType": "text/csv",
+                                "Base64Content": base64.encode(content)
+                            }]
                         }
                     ]
                 });
