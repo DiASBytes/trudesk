@@ -430,11 +430,11 @@ ticketsController.processor = function (req, res) {
 
                 content.data.filterEnabled = false
 
-                if(content.data.filter) {
-                    if(content.data.filter.status || content.data.filter.priority || 
+                if (content.data.filter) {
+                    if (content.data.filter.status || content.data.filter.priority ||
                         content.data.filter.groups || content.data.filter.types || content.data.filter.tags) {
-                            content.data.filterEnabled = true
-                        }
+                        content.data.filterEnabled = true
+                    }
                 }
 
                 // NOTE: render page
@@ -578,7 +578,16 @@ ticketsController.uploadImageMDE = function (req, res) {
     if (!object.ticketId) return res.status(400).json({ success: false })
 
     busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-        if (mimetype.indexOf('image/') === -1 && mimetype.indexOf('application') === -1) {
+        let valid = false;
+        const validMimeTypes = ['image', 'application', 'text/plain', 'text/xml'];
+
+        validMimeTypes.forEach(type => {
+            if (mimetype.indexOf(type) > -1) {
+                valid = true;
+            }
+        });
+
+        if (!valid) {
             error = {
                 status: 500,
                 message: 'Invalid File Type'
@@ -588,7 +597,7 @@ ticketsController.uploadImageMDE = function (req, res) {
         }
 
         var ext = path.extname(filename)
-        
+
         name = filename
 
         var savePath = path.join(__dirname, '../../public/uploads/tickets', object.ticketId)
