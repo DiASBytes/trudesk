@@ -2,6 +2,7 @@
     ticketType='{{data.ticket.type._id}}';
     ticketPriority='{{data.ticket.priority._id}}';
     ticketGroup='{{data.ticket.group._id}}';
+    ticketOwner='{{data.ticket.owner._id}}';
     subscribed={{isSubscribed data.ticket.subscribers data.common.loggedInAccount._id}};
     user='{{data.common.loggedInAccount._id}}';">
 
@@ -228,6 +229,20 @@
                                         {{else}}
                                             <div id="tGroup" class="input-box" data-ticketId="{{data.ticket._id}}">{{data.ticket.group.name}}</div>
                                         {{/hasPermOverRole}}
+                                </div>
+                                <div class="uk-width-1-1 nopadding uk-clearfix">
+                                        <span>Owner</span>
+                                        {{#compare data.common.loggedInAccount.role.isAdmin '===' true}}
+                                            <select name="tOwner" id="tOwner"
+                                                    ng-model="selectedOwner"
+                                                    ng-options="u.fullname for u in users track by u._id"
+                                                    ng-change="updateTicketOwner()"
+                                                    data-ticketId="{{data.ticket._id}}" {{#compare data.ticket.status '==' 3}}disabled{{/compare}}>
+
+                                            </select>
+                                        {{else}}
+                                            <div id="tOwner" class="input-box" data-ticketId="{{data.ticket._id}}">{{data.ticket.group.name}}</div>
+                                        {{/compare}}
                                 </div>
                                 <div class="uk-width-1-1 nopadding">
                                     <span>Tags

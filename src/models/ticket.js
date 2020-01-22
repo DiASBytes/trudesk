@@ -380,6 +380,34 @@ ticketSchema.methods.setTicketGroup = function (ownerId, groupId, callback) {
 }
 
 /**
+ * Sets this ticket under the given group Id
+ * @instance
+ * @method setTicketGroup
+ * @memberof Ticket
+ *
+ * @param {Object} ownerId Account ID preforming this action
+ * @param {Object} groupId MongoDB group Id to assign this ticket to
+ * @param {TicketCallback} callback Callback with the updated ticket.
+ */
+ticketSchema.methods.setTicketOwner = function (ownerId, newOwnerId, callback) {
+    var self = this
+    self.owner = newOwnerId
+
+    self.populate('owner', function (err, ticket) {
+        if (err) return callback(err)
+
+        var historyItem = {
+            action: 'ticket:set:owner',
+            description: 'Ticket Owner set to: ' + ticket.owner.fullname,
+            owner: ownerId
+        }
+        self.history.push(historyItem)
+
+        callback(null, ticket)
+    })
+}
+
+/**
  * Sets this ticket's issue text
  * @instance
  * @method setIssue
