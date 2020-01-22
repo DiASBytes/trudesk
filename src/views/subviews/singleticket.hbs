@@ -371,14 +371,14 @@
                                 <a id="tab-all-comments" href="#" class="tru-tab-selector no-ajaxy active" data-tabid="0" data-ticketid="{{data.ticket._id}}">All
                                     <span class="uk-badge uk-badge-grey uk-badge-small">{{size data.ticket.commentsAndNotes}}</span>
                                 </a>
-                                <a id="tab-public-comments" href="#" class="tru-tab-selector no-ajaxy" data-tabid="1" data-ticketid="{{data.ticket._id}}">Comments
-                                    <span class="uk-badge uk-badge-grey uk-badge-small">{{size data.ticket.comments}}</span>
-                                </a>
                                 {{#hasPermOverRole data.ticket.owner.role data.common.loggedInAccount.role 'tickets:notes'}}
-                                    <a id="tab-internal-notes" href="#" class="tru-tab-selector no-ajaxy" data-tabid="2" data-ticketid="{{data.ticket._id}}">Notes
+                                    <a id="tab-internal-notes" href="#" class="tru-tab-selector no-ajaxy" data-tabid="1" data-ticketid="{{data.ticket._id}}">Notes
                                         <span class="uk-badge uk-badge-grey uk-badge-small">{{size data.ticket.notes}}</span>
                                     </a>
                                 {{/hasPermOverRole}}
+                                <a id="tab-public-comments" href="#" class="tru-tab-selector no-ajaxy" data-tabid="2" data-ticketid="{{data.ticket._id}}">Comments
+                                    <span class="uk-badge uk-badge-grey uk-badge-small">{{size data.ticket.comments}}</span>
+                                </a>
 
                                 <span class="tru-tab-highlighter"></span>
                                 <span class="tru-tab-hr tru-tab-hr-lighten"></span>
@@ -477,8 +477,50 @@
                                     {{/foreach}}
                                 </div>
                             </div>
-                            <!-- Comments -->
+
+                            <!-- Notes -->
                             <div class="tru-tab-section hidden" data-tabid="1" style="padding-top: 20px;">
+                                <div class="notes" data-ticketId="{{data.ticket._id}}">
+                                    {{#foreach data.ticket.notes}}
+                                        <div class="ticket-note" data-noteid="{{_id}}">
+                                            <div class="ticket-comment-image relative uk-clearfix uk-float-left uk-display-inline-block">
+                                                {{#if owner.image}}
+                                                    <img class="profile-pic" src="/uploads/users/{{owner.image}}" alt=""/>
+                                                {{else}}
+                                                    <img class="profile-pic" src="/uploads/users/defaultProfile.jpg" alt="" />
+                                                {{/if}}
+                                                <span class="user-offline uk-border-circle" data-user-status-id="{{owner._id}}"></span>
+                                            </div>
+                                            <div class="issue-text">
+                                                <h3>Re: {{../data.ticket.subject}}</h3>
+                                                <a class="comment-email-link" href="mailto:{{owner.email}}">{{{owner.fullname}}} &lt;{{{owner.email}}}&gt;</a>
+                                                <br>
+                                                <time datetime="{{formatDate data (concat ../data.common.longDateFormat ../data.common.timeFormat true true)}}"
+                                                      title="{{formatDate data (concat ../data.common.longDateFormat ../data.common.timeFormat true true)}}"
+                                                      data-uk-tooltip="{delay: 200}">
+                                                    {{calendarDate date}}
+                                                </time>
+                                                <br>
+                                                <span class="uk-badge uk-badge-small nomargin-left-right text-white">NOTE</span>
+                                                <div class="comment-body">
+                                                    <p>{{{note}}}</p>
+                                                </div>
+                                            </div>
+                                            <div class="comment-actions note-actions {{#compare ../data.ticket.status '==' 3}}hide{{/compare}}">
+                                                {{#hasPermOverRole owner.role ../data.common.loggedInAccount.role "tickets:notes"}}
+                                                    <div class="remove-note" data-noteid="{{_id}}"><i class="material-icons">&#xE5CD;</i></div>
+                                                {{/hasPermOverRole}}
+                                                {{#hasPermOverRole owner.role ../data.common.loggedInAccount.role "tickets:notes"}}
+                                                    <div class="edit-note" data-noteid="{{_id}}" ng-click="showEditWindow('note', false, '{{_id}}');"><i class="material-icons">&#xE254;</i></div>
+                                                {{/hasPermOverRole}}
+                                            </div>
+                                        </div>
+                                    {{/foreach}}
+                                </div>
+                            </div>
+
+                            <!-- Comments -->
+                            <div class="tru-tab-section hidden" data-tabid="2" style="padding-top: 20px;">
                                 <div class="comments" data-ticketId="{{data.ticket._id}}">
                                     {{#foreach data.ticket.comments}}
                                         <div class="ticket-comment" data-commentId="{{_id}}">
@@ -527,47 +569,6 @@
                                                         <div class="edit-comment" data-commentId="{{_id}}" ng-click="showEditWindow('comment', false, '{{_id}}');"><i class="material-icons">&#xE254;</i></div>
                                                     {{/canEditSelf}}
                                                 {{/canUser}}
-                                            </div>
-                                        </div>
-                                    {{/foreach}}
-                                </div>
-                            </div>
-
-                            <!-- Notes -->
-                            <div class="tru-tab-section hidden" data-tabid="2" style="padding-top: 20px;">
-                                <div class="notes" data-ticketId="{{data.ticket._id}}">
-                                    {{#foreach data.ticket.notes}}
-                                        <div class="ticket-note" data-noteid="{{_id}}">
-                                            <div class="ticket-comment-image relative uk-clearfix uk-float-left uk-display-inline-block">
-                                                {{#if owner.image}}
-                                                    <img class="profile-pic" src="/uploads/users/{{owner.image}}" alt=""/>
-                                                {{else}}
-                                                    <img class="profile-pic" src="/uploads/users/defaultProfile.jpg" alt="" />
-                                                {{/if}}
-                                                <span class="user-offline uk-border-circle" data-user-status-id="{{owner._id}}"></span>
-                                            </div>
-                                            <div class="issue-text">
-                                                <h3>Re: {{../data.ticket.subject}}</h3>
-                                                <a class="comment-email-link" href="mailto:{{owner.email}}">{{{owner.fullname}}} &lt;{{{owner.email}}}&gt;</a>
-                                                <br>
-                                                <time datetime="{{formatDate data (concat ../data.common.longDateFormat ../data.common.timeFormat true true)}}"
-                                                      title="{{formatDate data (concat ../data.common.longDateFormat ../data.common.timeFormat true true)}}"
-                                                      data-uk-tooltip="{delay: 200}">
-                                                    {{calendarDate date}}
-                                                </time>
-                                                <br>
-                                                <span class="uk-badge uk-badge-small nomargin-left-right text-white">NOTE</span>
-                                                <div class="comment-body">
-                                                    <p>{{{note}}}</p>
-                                                </div>
-                                            </div>
-                                            <div class="comment-actions note-actions {{#compare ../data.ticket.status '==' 3}}hide{{/compare}}">
-                                                {{#hasPermOverRole owner.role ../data.common.loggedInAccount.role "tickets:notes"}}
-                                                    <div class="remove-note" data-noteid="{{_id}}"><i class="material-icons">&#xE5CD;</i></div>
-                                                {{/hasPermOverRole}}
-                                                {{#hasPermOverRole owner.role ../data.common.loggedInAccount.role "tickets:notes"}}
-                                                    <div class="edit-note" data-noteid="{{_id}}" ng-click="showEditWindow('note', false, '{{_id}}');"><i class="material-icons">&#xE254;</i></div>
-                                                {{/hasPermOverRole}}
                                             </div>
                                         </div>
                                     {{/foreach}}
