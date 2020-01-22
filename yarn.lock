@@ -4702,11 +4702,6 @@ esrecurse@^4.1.0:
   dependencies:
     estraverse "^4.1.0"
 
-esrever@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/esrever/-/esrever-0.2.0.tgz#96e9d28f4f1b1a76784cd5d490eaae010e7407b8"
-  integrity sha1-lunSj08bGnZ4TNXUkOquAQ50B7g=
-
 estraverse@^1.9.1:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-1.9.3.tgz#af67f2dc922582415950926091a4005d29c9bb44"
@@ -8747,14 +8742,6 @@ node-cache@4.2.0:
     clone "2.x"
     lodash "4.x"
 
-node-email-reply-parser@0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/node-email-reply-parser/-/node-email-reply-parser-0.1.1.tgz#94017db2748d11d545989b9fa3b591dedc94b2bf"
-  integrity sha512-E0WT9dv9wYlQ2V6QlJ4AgAb3D31Ajlx0d5bLwiaGkRBc86yzPikCl8QwqBfAABlzZskrforHQLl2gx6t2wAzWg==
-  dependencies:
-    esrever "^0.2.0"
-    lodash "^4.17.4"
-
 node-emoji@^1.4.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/node-emoji/-/node-emoji-1.8.1.tgz#6eec6bfb07421e2148c75c6bba72421f8530a826"
@@ -9980,6 +9967,11 @@ pkginfo@0.2.x:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/pkginfo/-/pkginfo-0.2.3.tgz#7239c42a5ef6c30b8f328439d9b9ff71042490f8"
   integrity sha1-cjnEKl72wwuPMoQ52bn/cQQkkPg=
+
+planer@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/planer/-/planer-1.1.1.tgz#8b0e935cd11b0ff10aaec8d91f0825e2d52c07f2"
+  integrity sha1-iw6TXNEbD/EKrsjZHwgl4tUsB/I=
 
 please-upgrade-node@^3.0.2:
   version "3.1.1"

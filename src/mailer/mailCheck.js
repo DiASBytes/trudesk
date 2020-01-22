@@ -19,7 +19,7 @@ var winston = require('winston')
 // var marked      = require('marked');
 var simpleParser = require('mailparser').simpleParser
 var cheerio = require('cheerio')
-var replyParser = require('node-email-reply-parser')
+var planer = require('planer')
 
 var fs = require('fs');
 var base64 = require('base64-stream')
@@ -287,6 +287,8 @@ function bindImapReady() {
                                                     message.body = mail.textAsHtml
                                                 }
 
+                                                message.bodyTxt = mail.text
+
                                                 // Check if email is a reply
                                                 var isReply = mail.subject.match(/#[1-9]\d*\b/g);
                                                 if (isReply) {
@@ -374,7 +376,10 @@ function handleMessages(messages) {
                             Ticket.getTicketByUid(message.replyUid, (err, t) => {
                                 if (!err && t && !t.deleted) {
                                     winston.debug('Reply email ticket found');
-                                    message.reply = replyParser(message.body, true);
+
+                                    const reply = planer.extractFrom(message.body, 'text/plain');
+
+                                    message.reply = reply;
                                     message.ticket = t;
                                     callback(null, t);
                                 } else {
