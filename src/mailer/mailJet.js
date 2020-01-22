@@ -113,4 +113,36 @@ module.exports = {
             }
         });
     },
+    sendClosedTicket: (ticket, billingData, emails) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const respondents = emails.split(',').map((email) => ({
+                    "Email": email.trim()
+                }));
+
+                await mailjet.post('send', { 'version': 'v3.1' }).request({
+                    "Messages": [
+                        {
+                            "From": {
+                                "Email": config.mailjet.fromEmail,
+                                "Name": 'DiASBytes Support'
+                            },
+                            "To": respondents,
+                            "TemplateID": 1190306,
+                            "TemplateLanguage": true,
+                            "Subject": `Closed: Ticket #${ticket.uid} - ${ticket.subject}`,
+                            "Variables": {
+                                "ticket": ticket,
+                                "data": billingData
+                            }
+                        }
+                    ]
+                });
+
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    },
 };

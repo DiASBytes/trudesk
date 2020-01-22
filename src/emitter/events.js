@@ -276,39 +276,9 @@ var notifications = require('../notifications') // Load Push Events
         })
 
         emitter.on('ticket:updated:mail', function (ticket, billingData, emails) {
-            var mailer = require('../mailer')
+            var mailJet = require('../mailer/mailJet')
 
-            var email = new Email({
-                views: {
-                    root: templateDir,
-                    options: {
-                        extension: 'handlebars'
-                    }
-                }
-            })
-
-            email
-                .render('ticket-closed', {
-                    ticket: ticket,
-                    data: billingData
-                })
-                .then(function (html) {
-                    var mailOptions = {
-                        to: emails,
-                        subject: 'Closed: Ticket #' + ticket.uid + '-' + ticket.subject,
-                        html: html,
-                        generateTextFromHTML: true
-                    }
-
-                    mailer.sendMail(mailOptions, function (err) {
-                        if (err) {
-                            winston.warn('[trudesk:events:sendSubscriberEmail] - ' + err)
-                        }
-                    })
-                })
-                .catch(function (err) {
-                    winston.warn('[trudesk:events:sendSubscriberEmail] - ' + err)
-                })
+            mailJet.sendClosedTicket(ticket, billingData, emails);
         })
 
         emitter.on('ticket:deleted', function (oId) {
