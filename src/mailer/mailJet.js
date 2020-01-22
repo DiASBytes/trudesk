@@ -179,4 +179,37 @@ module.exports = {
             }
         });
     },
+    sendTicketUpdateAssignee: (ticket, user) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await mailjet.post('send', { 'version': 'v3.1' }).request({
+                    "Messages": [
+                        {
+                            "From": {
+                                "Email": config.mailjet.fromEmail,
+                                "Name": 'DiASBytes Support'
+                            },
+                            "To": [
+                                {
+                                    "Email": user.email,
+                                    "Name": user.fullname
+                                }
+                            ],
+                            "TemplateID": 1191220,
+                            "TemplateLanguage": true,
+                            "Subject": `Update op ticket #${ticket.uid}`,
+                            "Variables": {
+                                "ticket": ticket,
+                                "user": user
+                            }
+                        }
+                    ]
+                });
+
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    },
 };

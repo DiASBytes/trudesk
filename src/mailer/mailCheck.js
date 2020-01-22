@@ -31,6 +31,8 @@ var groupSchema = require('../models/group')
 var ticketTypeSchema = require('../models/tickettype')
 var Ticket = require('../models/ticket')
 
+var mailJet = require('./mailJet')
+
 var mailCheck = {}
 mailCheck.inbox = []
 
@@ -582,6 +584,10 @@ function handleMessages(messages) {
                                         if (err) {
                                             winston.error(err);
                                             return;
+                                        }
+
+                                        if(ticket.assignee) {
+                                            mailJet.sendTicketUpdateAssignee(ticket, ticket.assignee);
                                         }
 
                                         if (message.attachments && message.attachments.length > 0) {
