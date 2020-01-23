@@ -29,3 +29,13 @@
 ## [1.0.21] (2019-12-06)
 
 * Added elastic search logging
+
+## [1.0.22] (2020-01-23)
+
+* Ticket history fix
+* Email attachment improvements
+* Added ticket origin (CSP/Mail/Chat)
+* Ability to change ticket contact
+* Filter & sort improvements
+* Ticket comment default on internal note
+* Close ticket / weekly report via Mailjet
