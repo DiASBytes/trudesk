@@ -593,7 +593,9 @@ function handleMessages(messages) {
                                             mailJet.sendTicketUpdateAssignee(ticket, ticket.assignee);
                                         }
 
-                                        if (message.attachments && message.attachments.length > 0) {
+                                        var messageAttachments = mailCheck.attachments.filter((a) => a.sqNumber === message.sqNumber);
+
+                                        if (messageAttachments && messageAttachments.length > 0) {
                                             const attachments = [];
 
                                             const publicPath = path.join(__dirname, '../../public/');
@@ -601,21 +603,21 @@ function handleMessages(messages) {
                                             if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
                                                 fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
 
-                                            for (var i = 0; i < message.attachments.length; i++) {
-                                                fs.rename(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`, function (err) {
+                                            for (var i = 0; i < messageAttachments.length; i++) {
+                                                fs.rename(messageAttachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${messageAttachments[i].filename}`, function (err) {
                                                     if (err)
                                                         throw err
                                                 })
 
                                                 attachments.push({
                                                     owner: message.replyUser.id,
-                                                    name: message.attachments[i].filename,
+                                                    name: messageAttachments[i].filename,
                                                     date: new Date(),
-                                                    path: `/uploads/tickets/${ticket._id}/${message.attachments[i].filename}`,
+                                                    path: `/uploads/tickets/${ticket._id}/${messageAttachments[i].filename}`,
                                                     type: 'image'
                                                 })
 
-                                                if (attachments.length === message.attachments.length) {
+                                                if (attachments.length === messageAttachments.length) {
                                                     ticket.addAttachmentsToComment(ticket._id, attachments, function () {
                                                         ticket.save(function (err, t) {
                                                             if (err) {
