@@ -35,6 +35,7 @@ var mailJet = require('./mailJet')
 
 var mailCheck = {}
 mailCheck.inbox = []
+mailCheck.attachments = []
 
 mailCheck.init = function (settings) {
     var s = {}
@@ -153,6 +154,8 @@ function findAttachmentParts(struct, attachments) {
             findAttachmentParts(i, attachments)
         } else if (i.disposition && ['INLINE', 'ATTACHMENT'].indexOf(toUpper(i.disposition.type)) > -1) {
             attachments.push(i)
+        } else if (i.params && i.params.name) {
+            attachments.push(i)
         }
     })
 
@@ -185,20 +188,16 @@ function buildAttMessageFunction(attachment, sqNumber) {
             var writeStream = fs.createWriteStream('./public/uploads/tmp/' + filename);
 
             writeStream.on('finish', function () {
-                var message = _.find(mailCheck.messages, function (message) { return message.sqNumber === sqNumber; });
+                winston.debug(`Added attachment: ${filename}`);
 
-                if (message) {
-                    if (!message.attachments)
-                        message.attachments = [];
-
-                    winston.debug(`Added attachment: ${filename}`);
-
-                    message.attachments.push({
-                        filename: filename,
-                        path: `./public/uploads/tmp/${filename}`
-                    });
-                }
+                mailCheck.attachments.push({
+                    sqNumber: sqNumber,
+                    filename: filename,
+                    path: `./public/uploads/tmp/${filename}`
+                });
             });
+
+            writeStream.on('error', err => console.log('Error writeStream attachment %s', err.message))
 
             if (toUpper(encoding) === 'BASE64') {
                 stream.pipe(new base64.Base64Decode()).pipe(writeStream);
@@ -301,8 +300,9 @@ function bindImapReady() {
                                                     message.replyUid = undefined;
                                                 }
 
-                                                const msg = _.clone(message);
-                                                mailCheck.messages.push(msg);
+                                                const clonedMsg = _.clone(message);
+                                                mailCheck.messages.push(clonedMsg);
+                                                
                                                 winston.debug('Message', { msg });
                                             })
                                         })
@@ -313,12 +313,12 @@ function bindImapReady() {
                                             for (var i = 0; i < attachments.length; i++) {
                                                 var attachment = attachments[i];
 
-                                                var f = mailCheck.Imap.fetch(attrs.uid, {
+                                                var af = mailCheck.Imap.fetch(attrs.uid, {
                                                     bodies: [attachment.partID],
                                                     struct: true
                                                 });
 
-                                                f.on('message', buildAttMessageFunction(attachment, sqNumber));
+                                                af.on('message', buildAttMessageFunction(attachment, sqNumber));
                                             }
                                         });
                                     })
@@ -537,7 +537,9 @@ function handleMessages(messages) {
                                             ticket: ticket
                                         })
 
-                                        if (message.attachments && message.attachments.length > 0) {
+                                        var messageAttachments = mailCheck.attachments.filter((a) => a.sqNumber === message.sqNumber);
+
+                                        if (messageAttachments && messageAttachments.length > 0) {
                                             winston.debug(`Message has attachments`);
                                             const attachments = [];
 
@@ -546,16 +548,16 @@ function handleMessages(messages) {
                                             if (!fs.existsSync(`${publicPath}uploads/tickets/${ticket._id}`))
                                                 fs.mkdirSync(`${publicPath}uploads/tickets/${ticket._id}`);
 
-                                            for (var i = 0; i < message.attachments.length; i++) {
+                                            for (var i = 0; i < messageAttachments.length; i++) {
                                                 try {
-                                                    fs.renameSync(message.attachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${message.attachments[i].filename}`);
-                                                    var ext = message.attachments[i].path.split('.').pop().toLowerCase();
+                                                    fs.renameSync(messageAttachments[i].path, `${publicPath}uploads/tickets/${ticket._id}/${messageAttachments[i].filename}`);
+                                                    var ext = messageAttachments[i].path.split('.').pop().toLowerCase();
                                                     var isImage = ext === "jpg" || ext === "png" || ext === "jpeg";
                                                     attachments.push({
                                                         owner: message.owner._id,
-                                                        name: message.attachments[i].filename,
+                                                        name: messageAttachments[i].filename,
                                                         date: new Date(),
-                                                        path: `/uploads/tickets/${ticket._id}/${message.attachments[i].filename}`,
+                                                        path: `/uploads/tickets/${ticket._id}/${messageAttachments[i].filename}`,
                                                         type: isImage ? 'image' : `.${ext}`
                                                     })
                                                 } catch (e) {
