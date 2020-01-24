@@ -273,16 +273,22 @@ function bindImapReady() {
                                                     message.from = mail.headers.get('from').value[0].address
                                                 }
 
-
                                                 if (mail.subject) {
                                                     message.subject = mail.subject
                                                 } else {
                                                     message.subject = message.from
                                                 }
 
+                                                var $ = cheerio.load(mail.html)
+                                                var $body = $('body')
+                                                var $supportDivider = $('#support-divider')
+
+                                                if($supportDivider) {
+                                                    $supportDivider.parent().parents().eq(15).remove();
+                                                    message.htmlAfterDivider = $body.html()
+                                                }
+
                                                 if (_.isUndefined(mail.textAsHtml)) {
-                                                    var $ = cheerio.load(mail.html)
-                                                    var $body = $('body')
                                                     message.body = $body.length > 0 ? $body.html() : mail.html
                                                 } else {
                                                     message.body = mail.textAsHtml
@@ -379,9 +385,9 @@ function handleMessages(messages) {
                                 if (!err && t && !t.deleted) {
                                     winston.debug('Reply email ticket found');
 
-                                    const reply = planer.extractFrom(message.body, 'text/plain');
+                                    // const reply = planer.extractFrom(message.body, 'text/plain');
 
-                                    message.reply = reply;
+                                    message.reply = message.htmlAfterDivider;
                                     message.ticket = t;
                                     callback(null, t);
                                 } else {

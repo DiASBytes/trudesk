@@ -64,7 +64,7 @@ module.exports = {
                                     })()
                                 }
                             ],
-                            "TemplateID": 779757,
+                            "TemplateID": 1196217,
                             "TemplateLanguage": true,
                             "Subject": `Ticket #${ticket.uid} updated: ${ticket.subject}`,
                             "Variables": {
