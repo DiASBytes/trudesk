@@ -284,7 +284,10 @@ function bindImapReady() {
                                                 var $supportDivider = $('#support-divider')
 
                                                 if($supportDivider) {
-                                                    $supportDivider.parent().parents().eq(15).remove();
+                                                    var $updateMail = $supportDivider.parent().parents().eq(15)
+                                                    $updateMail.nextAll().remove()
+                                                    $updateMail.remove()
+
                                                     message.htmlAfterDivider = $body.html()
                                                 }
 
@@ -385,9 +388,18 @@ function handleMessages(messages) {
                                 if (!err && t && !t.deleted) {
                                     winston.debug('Reply email ticket found');
 
-                                    // const reply = planer.extractFrom(message.body, 'text/plain');
+                                    const reply = planer.extractFrom(message.body, 'text/plain');
+                                    message.reply = reply;
 
-                                    message.reply = message.htmlAfterDivider;
+                                    if(reply.endsWith('&gt;')) {
+                                        message.reply = reply.substring(0, reply.length - 4)
+                                    }
+                                    
+                                    // check for content from ticket update mail
+                                    if(reply.includes("Rijksweg 53 | 9681 Maarkedal | +32 55 27 09 99")) {
+                                        message.reply = message.htmlAfterDivider;
+                                    }
+
                                     message.ticket = t;
                                     callback(null, t);
                                 } else {
