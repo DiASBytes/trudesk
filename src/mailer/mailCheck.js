@@ -288,7 +288,15 @@ function bindImapReady() {
                                                     $updateMail.nextAll().remove()
                                                     $updateMail.remove()
 
-                                                    message.htmlAfterDivider = $body.html()
+                                                    var htmlString = $body.html();
+                                                    var outlookString = '<div><div style="border:none;border-top:solid #E1E1E1 1.0pt';
+
+                                                    if(htmlString.includes(outlookString)) {
+                                                        const stringIndex = htmlString.indexOf(outlookString);
+                                                        message.htmlAfterDivider = htmlString.substring(0, stringIndex) + '</div>';
+                                                    } else {
+                                                        message.htmlAfterDivider = $body.html()
+                                                    }
                                                 }
 
                                                 if (_.isUndefined(mail.textAsHtml)) {
