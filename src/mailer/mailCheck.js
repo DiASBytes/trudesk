@@ -578,7 +578,7 @@ function handleMessages(messages) {
                                     }
                                 )
                             } else {
-                                message.ticket.addComment(message.replyUser.id, message.reply, function () {
+                                message.ticket.addComment(message.replyUser, message.reply, function () {
                                     winston.debug(`Adding comment to ticket ${message.ticket.uid}`);
 
                                     message.ticket.needsAttention = !message.replyUser.email.includes('diasbytes.com');

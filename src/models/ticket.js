@@ -474,10 +474,10 @@ ticketSchema.methods.setSubject = function (ownerId, subject, callback) {
  *    });
  * });
  */
-ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
+ticketSchema.methods.addComment = function (replyUser, commentText, callback) {
     var self = this
 
-    if (_.isUndefined(ownerId)) return callback('Invalid owner', null)
+    if (_.isUndefined(replyUser)) return callback('Invalid reply user', null)
 
     if (_.isUndefined(commentText)) return callback('Invalid comment', null)
 
@@ -493,7 +493,7 @@ ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
     });
 
     var Comment = {
-        owner: ownerId,
+        owner: replyUser.id,
         date: new Date(),
         comment: marked(commentText)
     };
@@ -502,14 +502,14 @@ ticketSchema.methods.addComment = function (ownerId, commentText, callback) {
 
     self.comments.push(Comment)
 
-    if (self.owner.id === ownerId) {
+    if(!replyUser.email.includes('diasbytes.com')) {
         self.status = 1;
     }
 
     var HistoryItem = {
         action: 'ticket:comment:added',
         description: 'Comment was added',
-        owner: ownerId
+        owner: replyUser.id
     }
 
     self.history.push(HistoryItem)
