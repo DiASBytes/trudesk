@@ -273,16 +273,33 @@ function bindImapReady() {
                                                     message.from = mail.headers.get('from').value[0].address
                                                 }
 
-
                                                 if (mail.subject) {
                                                     message.subject = mail.subject
                                                 } else {
                                                     message.subject = message.from
                                                 }
 
+                                                var $ = cheerio.load(mail.html)
+                                                var $body = $('body')
+                                                var $supportDivider = $('#support-divider')
+
+                                                if($supportDivider) {
+                                                    var $updateMail = $supportDivider.parent().parents().eq(15)
+                                                    $updateMail.nextAll().remove()
+                                                    $updateMail.remove()
+
+                                                    var htmlString = $body.html();
+                                                    var outlookString = '<div><div style="border:none;border-top:solid #E1E1E1 1.0pt';
+
+                                                    if(htmlString.includes(outlookString)) {
+                                                        const stringIndex = htmlString.indexOf(outlookString);
+                                                        message.htmlAfterDivider = htmlString.substring(0, stringIndex) + '</div>';
+                                                    } else {
+                                                        message.htmlAfterDivider = $body.html()
+                                                    }
+                                                }
+
                                                 if (_.isUndefined(mail.textAsHtml)) {
-                                                    var $ = cheerio.load(mail.html)
-                                                    var $body = $('body')
                                                     message.body = $body.length > 0 ? $body.html() : mail.html
                                                 } else {
                                                     message.body = mail.textAsHtml
@@ -380,8 +397,17 @@ function handleMessages(messages) {
                                     winston.debug('Reply email ticket found');
 
                                     const reply = planer.extractFrom(message.body, 'text/plain');
-
                                     message.reply = reply;
+
+                                    if(reply.endsWith('&gt;')) {
+                                        message.reply = reply.substring(0, reply.length - 4)
+                                    }
+                                    
+                                    // check for content from ticket update mail
+                                    if(reply.includes("Rijksweg 53 | 9681 Maarkedal | +32 55 27 09 99")) {
+                                        message.reply = message.htmlAfterDivider;
+                                    }
+
                                     message.ticket = t;
                                     callback(null, t);
                                 } else {
