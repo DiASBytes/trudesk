@@ -39,3 +39,8 @@
 * Filter & sort improvements
 * Ticket comment default on internal note
 * Close ticket / weekly report via Mailjet
+
+## [1.0.23] (2020-02-14)
+
+* Ticket history fix / 2
+* New reply status change 'open'
