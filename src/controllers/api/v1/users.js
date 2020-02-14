@@ -44,7 +44,7 @@ var apiUsers = {}
  }
  */
 apiUsers.getWithLimit = function (req, res) {
-    var limit = 10
+    var limit = 500
     if (!_.isUndefined(req.query.limit)) {
         limit = parseInt(req.query.limit)
     }
