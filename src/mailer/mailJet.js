@@ -25,7 +25,7 @@ module.exports = {
                                     })()
                                 }
                             ],
-                            "TemplateID": 779007,
+                            "TemplateID": 1650449,
                             "TemplateLanguage": true,
                             "Subject": `New ticket #${ticket.uid}: ${ticket.subject}`,
                             "Variables": {
@@ -64,7 +64,7 @@ module.exports = {
                                     })()
                                 }
                             ],
-                            "TemplateID": 1196217,
+                            "TemplateID": 1650453,
                             "TemplateLanguage": true,
                             "Subject": `Ticket #${ticket.uid} updated: ${ticket.subject}`,
                             "Variables": {
@@ -96,7 +96,7 @@ module.exports = {
                                     "Name": user.fullname
                                 }
                             ],
-                            "TemplateID": 1074477,
+                            "TemplateID": 1650445, // updated
                             "TemplateLanguage": true,
                             "Subject": `Nieuw ticket toegewezen`,
                             "Variables": {
@@ -129,7 +129,7 @@ module.exports = {
                                 "Name": 'DiASBytes Support'
                             },
                             "To": respondents,
-                            "TemplateID": 1190306,
+                            "TemplateID": 1650448, // updated
                             "TemplateLanguage": true,
                             "Subject": `Closed: Ticket #${ticket.uid} - ${ticket.subject}`,
                             "Variables": {
@@ -161,7 +161,7 @@ module.exports = {
                                 "Name": 'DiASBytes Support'
                             },
                             "To": respondents,
-                            "TemplateID": 1190514,
+                            "TemplateID": 1650456,
                             "TemplateLanguage": true,
                             "Subject": `Weekly report`,
                             "Attachments": [{
@@ -195,7 +195,7 @@ module.exports = {
                                     "Name": user.fullname
                                 }
                             ],
-                            "TemplateID": 1191220,
+                            "TemplateID": 1650469,
                             "TemplateLanguage": true,
                             "Subject": `Update op ticket #${ticket.uid}`,
                             "Variables": {
