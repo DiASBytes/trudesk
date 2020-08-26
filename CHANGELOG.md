@@ -44,3 +44,7 @@
 
 * Ticket history fix / 2
 * New reply status change 'open'
+
+## [1.0.24] (2020-08-26)
+
+* New mailjet account
