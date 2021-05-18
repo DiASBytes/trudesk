@@ -279,7 +279,7 @@ function bindImapReady() {
                                                     message.subject = message.from
                                                 }
 
-                                                var $ = cheerio.load(mail.html)
+                                                var $ = cheerio.load(mail.html ? mail.html : mail.textAsHtml)
                                                 var $body = $('body')
                                                 var $supportDivider = $('#support-divider')
 
