@@ -3,14 +3,14 @@ executors:
   docker-publisher:
     environment:
       IMAGE_NAME: diasbytes/support-tickets
-      IMAGE_VERSION: 1.0.24
+      IMAGE_VERSION: 1.0.25
     docker:
       - image: circleci/buildpack-deps:stretch
   node-tester:
     docker:
       - image: circleci/node:10.16.3
 jobs:
-  build:    
+  build:
     executor: docker-publisher
     working_directory: ~/repo
 
